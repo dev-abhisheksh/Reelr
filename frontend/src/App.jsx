@@ -1,45 +1,72 @@
-import React from 'react'
-import { ImmersiveProvider } from './components/ImmersiveMode'
-import BottomBar from './components/BottomBar'
-import ReelPage from './pages/ReelPage'
-import { Route, Routes } from 'react-router-dom'
-import HomePge from './pages/HomePge'
-import AddReel from './pages/AddReel'
-import ProfilePage from './pages/ProfilePage'
-import SearchPage from './pages/SearchPage'
-import LoginPage from './pages/LoginPage'
+import React from "react";
+import { ImmersiveProvider } from "./components/ImmersiveMode";
+import BottomBar from "./components/BottomBar";
+import { Route, Routes, useLocation } from "react-router-dom";
+import HomePge from "./pages/HomePge";
+import AddReel from "./pages/AddReel";
+import ProfilePage from "./pages/ProfilePage";
+import SearchPage from "./pages/SearchPage";
+import LoginPage from "./pages/LoginPage";
+import ReelPage from "./pages/ReelPage";
+import ProtectedRoutes from "./routes/ProtectedRoutes";
 
 const App = () => {
+  const location = useLocation();
+  const hideBottomBar = location.pathname === "/login"; // hide on login page
+
   return (
     <ImmersiveProvider>
       <Routes>
-
-
-        <Route path='/' element={
-          <div className='flex flex-col justify-between h-screen'>
-            <ReelPage />
-            <div className='absolute bottom-3 w-full'>
-              <BottomBar />
-            </div>
-          </div>
-        } />
-
-        <Route path='/login' element={<LoginPage/>}/>
-        <Route path='/home' element={<HomePge />} />
-        <Route path='/search' element={<SearchPage />} />
-        <Route path='/profile' element={<ProfilePage />} />
-        <Route path='/upload' element={<AddReel />} />
-
+        <Route
+          path="/"
+          element={
+            <ProtectedRoutes>
+              <ReelPage />
+            </ProtectedRoutes>
+          }
+        />
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoutes>
+              <HomePge />
+            </ProtectedRoutes>
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoutes>
+              <SearchPage />
+            </ProtectedRoutes>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoutes>
+              <ProfilePage />
+            </ProtectedRoutes>
+          }
+        />
+        <Route
+          path="/upload"
+          element={
+            <ProtectedRoutes>
+              <AddReel />
+            </ProtectedRoutes>
+          }
+        />
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
 
-      <div className='fixed bottom-3 w-full z-50'>
-        <BottomBar />
-      </div>
-
-
-
+      {!hideBottomBar && (
+        <div className="fixed bottom-3 w-full z-50">
+          <BottomBar />
+        </div>
+      )}
     </ImmersiveProvider>
-  )
-}
+  );
+};
 
-export default App
+export default App;

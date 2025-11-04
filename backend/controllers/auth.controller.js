@@ -77,33 +77,37 @@ const loginUser = async (req, res) => {
             return res.status(400).json({ message: "All fields are mandatory" });
         }
 
+        // 1. Check user exists
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ message: "Email not registered" });
         }
 
+        // 2. Check password
         const isMatchPassword = await bcrypt.compare(password, user.password);
         if (!isMatchPassword) {
             return res.status(401).json({ message: "Incorrect password" });
         }
 
-        const loggedInUser = await User.findById(user._id).select("-password");
-
+        // 3. Generate JWT tokens
         const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user);
 
-        // ✅ FIXED COOKIE CONFIG
+        // 4. Send access token as HTTP-only cookie
         res.cookie("accessToken", accessToken, {
-            httpOnly: true, // not accessible via JS
-            secure: false, // must be false for localhost (set true in production)
-            sameSite: "lax", // "lax" works locally; "none" + secure:true for production
+            httpOnly: true,
+            secure: false, // ❗ change to true in production (https)
+            sameSite: "lax", // use "none" + secure:true in production
             maxAge: 24 * 60 * 60 * 1000, // 1 day
         });
 
-        res.status(200).json({
+        // 5. Return user data (no tokens in response)
+        const loggedInUser = await User.findById(user._id).select("-password");
+
+        return res.status(200).json({
             success: true,
             message: "Login successful",
-            loggedInUser,
+            user: loggedInUser,
         });
     } catch (error) {
         console.error("Login error:", error);
@@ -111,8 +115,18 @@ const loginUser = async (req, res) => {
     }
 };
 
+// verify logged-in user (used for cookie-based auth check)
+const verifyUser = (req, res) => {
+    return res.status(200).json({
+        success: true,
+        message: "User authenticated",
+        user: req.user,
+    });
+};
+
 
 export {
     registerUser,
-    loginUser
+    loginUser,
+    verifyUser
 }
