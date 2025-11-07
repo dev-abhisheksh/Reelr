@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { userProfile } from "../api/user.api";
+import { myReels, userProfile } from "../api/user.api";
+import { IoMdArrowRoundBack } from "react-icons/io";
+
 
 const ProfilePage = () => {
   const [userDetails, setUserDetails] = useState(null);
   const [userId, setUserId] = useState("");
+  const [reels, setReels] = useState([])
+  const [reelsModal, setReelsModal] = useState(false)
+  const [selectedReel, setSelectedReel] = useState(null)
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const { user, userId } = await userProfile();
-        console.log("User details", user);
-        console.log("UserId", userId);
-        // console.log("Full user data:", user);
-        console.log("Profile image path:", user?.profileImage);
-        console.log("Cover image path:", user?.coverImage);
         setUserDetails(user);
         setUserId(userId);
       } catch (error) {
@@ -22,6 +22,22 @@ const ProfilePage = () => {
     };
     fetchProfile();
   }, []);
+
+  useEffect(() => {
+    const fetchUserReels = async () => {
+      try {
+        const reelsData = await myReels(); // API call
+        console.log("Fetched reels:", reelsData); // this must show
+        setReels(reelsData);
+      } catch (error) {
+        console.error("Failed to fetch user reels:", error);
+      }
+    };
+
+    fetchUserReels();
+  }, []);
+
+  const toggleReelModal = () => setReelsModal(!reelsModal)
 
   if (!userDetails) {
     return (
@@ -71,7 +87,7 @@ const ProfilePage = () => {
       {/* Stats Section */}
       <div className="flex justify-around w-full mt-6 text-center border-t border-b border-gray-700 py-4">
         <div>
-          <p className="font-semibold text-lg">0</p>
+          <p className="font-semibold text-lg">{reels.length}</p>
           <p className="text-gray-400 text-sm">Posts</p>
         </div>
         <div>
@@ -104,17 +120,69 @@ const ProfilePage = () => {
 
       {/* Posts Grid Placeholder */}
       <div className="grid grid-cols-3 gap-1 mt-8 w-full max-w-md px-2">
-        {[...Array(9)].map((_, i) => (
-          <div
-            key={i}
-            className="aspect-square bg-gray-800 flex items-center justify-center text-gray-600 text-sm"
+        {reels.length > 0 && reels.map((reel, index) => (
+          <div key={index}
+            className="aspect-square border border-white bg-gray-800 flex items-center justify-center text-gray-600 text-sm overflow-hidden"
+            onClick={() => {
+              setSelectedReel(reel);
+              setReelsModal(true);
+            }}
           >
-            Coming soon
+            <video
+
+              src={reel.videoUrl}
+              className="w-full h-full object-cover"
+              muted
+              loop
+            />
           </div>
+
         ))}
       </div>
+
+      {/* //creating a model to view each reels by clicking on it */}
+      {reelsModal && selectedReel ? (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
+          <div className="w-[92%] h-[90%] bg-[#1C1C1D] rounded-lg flex justify-center">
+            <button
+              className="absolute right-2 top-5 h-10 w-10 rounded-full z-55 bg-gray-700 flex justify-center items-center"
+              onClick={() => setReelsModal(false)}
+            >
+              <IoMdArrowRoundBack size={32} />
+            </button>
+
+            {/* Video Preview */}
+            <div className="h-[55%] w-[95%] flex justify-center items-center">
+              <div className="flex flex-col overflow-hidden gap-5">
+                <div className="h-[55%] overflow-hidden">
+                  <video
+                    className="w-full h-[55%] overflow-hidden rounded-md"
+                    src={selectedReel.videoUrl}
+                    autoPlay
+                    loop
+                    playsInline 
+                  />
+                </div>
+                <div className="p-3 flex flex-col justify-between h-full flex-1">
+                  <div>
+                    <h1 className="font-bold">Title : {selectedReel.title}</h1>
+                    <p className="text-gray-400 pl-2">Description : {selectedReel.description}</p>
+                  </div>
+
+                  <div className="absolute bottom-20 left-10">
+                    <h3>Views : {selectedReel.views}</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : ""}
+
+
     </div>
   );
 };
 
 export default ProfilePage;
+// className = "aspect-square bg-gray-800 flex items-center justify-center text-gray-600 text-sm"

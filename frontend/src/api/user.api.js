@@ -16,3 +16,14 @@ export const userProfile = async () => {
         throw error;
     }
 };
+
+export const myReels = async () => {
+    try {
+        const res = await API.get("/my-reels", { withCredentials: true })
+        const reelsData = res.data;
+        return reelsData;
+    } catch (error) {
+        console.error("Error fetching user reels", error)
+        throw error;
+    }
+}

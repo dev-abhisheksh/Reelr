@@ -1,5 +1,6 @@
 import cloudinary from "../config/cloudinary.js";
 import { User } from "../models/user.model.js";
+import { Reel } from "../models/reels.model.js";
 
 const uploadUserImage = async (req, res) => {
     try {
@@ -69,8 +70,6 @@ const uploadUserImage = async (req, res) => {
     }
 };
 
-
-
 const getMyProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user._id)
@@ -118,8 +117,25 @@ const updateProfile = async (req, res) => {
     }
 }
 
+const myReels = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        const reels = await Reel.find({ creator: userId })
+            .populate("creator", "username profileImage") // only valid ref
+            .sort({ createdAt: -1 });
+
+        return res.status(200).json(reels); // send actual data
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Failed to fetch reels" });
+    }
+};
+
+
 export {
     uploadUserImage,
     getMyProfile,
-    updateProfile
+    updateProfile,
+    myReels
 }
