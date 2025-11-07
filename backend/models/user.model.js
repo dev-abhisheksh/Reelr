@@ -33,12 +33,6 @@ const userSchema = new mongoose.Schema(
         coverImage: {
             type: String
         },
-        watchHistory: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Reel",
-            },
-        ],
         role: {
             type: String,
             enum: ["viewer", "creator", "admin"],

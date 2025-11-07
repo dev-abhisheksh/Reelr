@@ -1,38 +1,55 @@
-import React, { useEffect, useState, useRef } from 'react'
-import { getAllReels, incrementReelView } from '../api/reels.api'
+import React, { useEffect, useRef } from 'react'
+import { incrementReelView } from '../api/reels.api'
 import { AiFillEye } from "react-icons/ai";
 import { FaHeart, FaRegCommentDots } from "react-icons/fa";
 import ImmersiveMode from '../components/ImmersiveMode';
 import { useImmersive } from '../components/ImmersiveMode'
-
+import { useReels } from '../context/ReelsContext';
 
 const HomePage = () => {
-    const [reels, setReels] = useState([])
+    const { 
+        reels, 
+        isMuted, 
+        setIsMuted, 
+        markAsViewed, 
+        updateReelViews,
+        scrollPosition,
+        setScrollPosition 
+    } = useReels();
+    
     const videoRefs = useRef([])
-    const [unmutedIndex, setUnmutedIndex] = useState(null)
-     const { isImmersive } = useImmersive();
+    const containerRef = useRef(null);
+    const { isImmersive } = useImmersive();
 
-    // ✅ Initialize viewedSet from sessionStorage - correct way
-    const getInitialViewedSet = () => {
-        try {
-            const stored = sessionStorage.getItem('viewedReels');
-            return stored ? new Set(JSON.parse(stored)) : new Set();
-        } catch {
-            return new Set();
-        }
-    };
-
-    const viewedSet = useRef(getInitialViewedSet());
-
+    // ✅ Restore scroll position when returning to page
     useEffect(() => {
-        getAllReels()
-            .then(res => {
-                console.log(res.data.allReels);
-                setReels(res.data.allReels);
-            })
-            .catch(err => console.error(err));
+        if (containerRef.current && scrollPosition > 0) {
+            containerRef.current.scrollTop = scrollPosition;
+        }
     }, []);
 
+    // ✅ Save scroll position before unmounting
+    useEffect(() => {
+        const container = containerRef.current;
+        
+        const handleScroll = () => {
+            if (container) {
+                setScrollPosition(container.scrollTop);
+            }
+        };
+
+        if (container) {
+            container.addEventListener('scroll', handleScroll);
+        }
+
+        return () => {
+            if (container) {
+                container.removeEventListener('scroll', handleScroll);
+            }
+        };
+    }, [setScrollPosition]);
+
+    // ✅ Auto play + view increment logic
     useEffect(() => {
         if (!reels.length) return;
 
@@ -43,34 +60,14 @@ const HomePage = () => {
 
                 if (entry.isIntersecting) {
                     video.play();
-
                     const reel = reels[index];
 
-                    if (reel && !viewedSet.current.has(reel._id)) {
-                        viewedSet.current.add(reel._id);
-
-                        // ✅ Save to sessionStorage
-                        try {
-                            sessionStorage.setItem(
-                                'viewedReels',
-                                JSON.stringify([...viewedSet.current])
-                            );
-                        } catch (err) {
-                            console.error("Failed to save to sessionStorage:", err);
-                        }
-
+                    if (reel && markAsViewed(reel._id)) {
                         incrementReelView(reel._id)
                             .then(() => {
-                                setReels((prev) =>
-                                    prev.map((r) =>
-                                        r._id === reel._id ? { ...r, views: (r.views || 0) + 1 } : r
-                                    )
-                                );
-                                console.log("✅ View incremented:", reel.title);
+                                updateReelViews(reel._id);
                             })
-                            .catch((err) =>
-                                console.error("❌ Failed to increment view:", err)
-                            );
+                            .catch(err => console.error("Failed to increment view:", err));
                     }
                 } else {
                     video.pause();
@@ -89,18 +86,23 @@ const HomePage = () => {
             observer.disconnect();
         };
 
-    }, [reels.length]);
+    }, [reels.length, markAsViewed, updateReelViews]);
 
-    const toggleMute = (index) => {
-        const video = videoRefs.current[index]
-        if (video) {
-            video.muted = !video.muted
-            setUnmutedIndex(video.muted ? null : index)
-        }
-    }
+    // ✅ Global mute/unmute
+    const toggleMute = () => {
+        const newState = !isMuted;
+        setIsMuted(newState);
+
+        videoRefs.current.forEach(video => {
+            if (video) video.muted = newState;
+        });
+    };
 
     return (
-        <div className="h-screen w-full bg-black overflow-y-scroll snap-y snap-mandatory">
+        <div 
+            ref={containerRef}
+            className="h-screen w-full bg-black overflow-y-scroll snap-y snap-mandatory"
+        >
             {reels.length > 0 ? (
                 reels.map((reel, index) => (
                     <div
@@ -112,9 +114,9 @@ const HomePage = () => {
                             src={reel.videoUrl}
                             className="h-full w-full object-cover"
                             loop
-                            muted={unmutedIndex !== index}
+                            muted={isMuted}
                             playsInline
-                            onClick={() => toggleMute(index)}
+                            onClick={toggleMute}
                         />
 
                         <div className='absolute top-20 right-5'>
@@ -122,8 +124,7 @@ const HomePage = () => {
                         </div>
 
                         {/* Side icons */}
-                        <div className={`flex justify-center py-2 transition-all duration-300 ${isImmersive ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                            }`}>
+                        <div className={`flex justify-center py-2 transition-all duration-300 ${isImmersive ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                             <div className='absolute right-5 bottom-40'>
                                 <div className='flex flex-col gap-4'>
                                     <div className="flex flex-col items-center justify-center gap-1">
@@ -150,16 +151,15 @@ const HomePage = () => {
                             </div>
                         </div>
 
-
-                        {/* Overlay info */}
+                        {/* Text overlay */}
                         <div className="absolute bottom-25 left-5 text-white">
                             <h1 className="text-lg font-semibold">@{reel.creator?.username}</h1>
                             <p className="text-sm opacity-80">{reel.description}</p>
                         </div>
 
-                        {/* Mute/Unmute indicator */}
+                        {/* Mute indicator */}
                         <div className="absolute top-5 right-5 text-white bg-black/50 px-3 py-1 rounded-full text-sm">
-                            {unmutedIndex === index ? "🔊" : "🔇"}
+                            {isMuted ? "🔇" : "🔊"}
                         </div>
                     </div>
                 ))
@@ -167,7 +167,7 @@ const HomePage = () => {
                 <p className="text-white text-center mt-10">No reels found</p>
             )}
         </div>
-    )
-}
+    );
+};
 
-export default HomePage
+export default HomePage;

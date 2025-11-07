@@ -75,10 +75,10 @@ const getMyProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user._id)
             .select("-password -__v")
-            .populate({
-                path: "watchHistory",
-                select: "title thumbnailUrl views likes",
-            })
+            // .populate({
+            //     path: "watchHistory",
+            //     select: "title thumbnailUrl views likes",
+            // })
             .lean();
 
         res.status(200).json({
