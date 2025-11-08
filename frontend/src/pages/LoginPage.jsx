@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { loginUser } from '../api/auth.api'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 
 const LoginPage = () => {
@@ -10,11 +10,11 @@ const LoginPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        console.log("Form submitted with:", { email, password });
+        // console.log("Form submitted with:", { email, password });
 
         try {
             const res = await loginUser({ email, password })
-            console.log("Login response:", res);
+            // console.log("Login response:", res);
             navigate("/")
         } catch (error) {
             console.error("Login error:", error);
@@ -66,7 +66,7 @@ const LoginPage = () => {
                                 </button>
                             </form>
                             <div className='flex gap-5'>
-                                <p className='text-gray-400 hover:text-white text-[13px] font-semibold'>Sign Up</p>
+                                <p className='text-gray-400 hover:text-white text-[13px] font-semibold'><Link to="/register">Sign Up</Link></p>
                                 <p className='text-gray-400 hover:text-white text-[13px] font-semibold'>Forgot Password?</p>
                             </div>
                         </div>

@@ -8,3 +8,7 @@ export const loginUser = (data) =>
 
 export const verifyUser = () =>
   axios.get(`${BASE_URL}/verify`, { withCredentials: true }); // ✅
+
+export const registerUser = (data) => {
+  return axios.post(`${BASE_URL}/register`, data, { withCredentials: true });
+};

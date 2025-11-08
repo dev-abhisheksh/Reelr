@@ -10,6 +10,7 @@ import LoginPage from "./pages/LoginPage";
 import ReelPage from "./pages/ReelPage";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import { ReelsProvider } from "./context/ReelsContext";
+import RegisterPage from "./pages/RegisterPage";
 // import Layout from "./components/Layout";
 
 const App = () => {
@@ -64,6 +65,7 @@ const App = () => {
             }
           />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Routes>
 
         {!hideBottomBar && (

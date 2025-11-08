@@ -114,7 +114,7 @@ const HomePage = () => {
                             src={reel.videoUrl}
                             className="h-full w-full object-cover"
                             loop
-                            muted={isMuted}
+                            muted
                             playsInline
                             onClick={toggleMute}
                         />

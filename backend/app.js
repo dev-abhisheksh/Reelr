@@ -14,7 +14,7 @@ app.use(cors({
     credentials: true  
 }));
 
-app.use("/auth/", authRoutes)
+app.use("/auth", authRoutes)
 app.use("/user", userRoutes)
 app.use("/api/reel/", reelRoutes)
 
