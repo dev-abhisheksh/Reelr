@@ -1,7 +1,7 @@
 // src/api/auth.api.js
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8000/auth";
+const BASE_URL = "https://reelr.onrender.com/auth";
 
 export const loginUser = (data) =>
   axios.post(`${BASE_URL}/login`, data, { withCredentials: true });

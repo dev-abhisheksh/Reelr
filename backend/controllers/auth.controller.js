@@ -96,8 +96,8 @@ const loginUser = async (req, res) => {
         // 4. Send access token as HTTP-only cookie
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            secure: false, // ❗ change to true in production (https)
-            sameSite: "lax", // use "none" + secure:true in production
+            secure: true, // ❗ change to true in production (https)
+            sameSite: "none", // use "none" + secure:true in production
             maxAge: 24 * 60 * 60 * 1000, // 1 day
         });
 

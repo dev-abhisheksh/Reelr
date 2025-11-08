@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: "http://localhost:8000/user",
+    baseURL: "https://reelr.onrender.com/user",
     withCredentials: true,
 });
 
