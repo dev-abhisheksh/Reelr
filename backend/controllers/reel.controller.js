@@ -2,43 +2,45 @@ import { Reel } from "../models/reels.model.js";
 import cloudinary from "../config/cloudinary.js";
 
 const uploadReel = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(404).json({ message: "video file not uploaded" });
-    }
-
-    const result = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        {
-          resource_type: "video",
-          folder: "reelsFolder",
-          format: "mp4", // 👈 ensures Cloudinary converts all videos to MP4
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
+    try {
+        if (!req.file) {
+            return res.status(404).json({ message: "video file not uploaded" });
         }
-      );
-      stream.end(req.file.buffer);
-    });
 
-    // creating in DB
-    const { title, description } = req.body;
-    const reel = await Reel.create({
-      title,
-      description,
-      videoUrl: result.secure_url,
-      creator: req.user._id,
-      thumbnail: req.body.thumbnail || "",
-    });
+        const result = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                {
+                    resource_type: "video",
+                    folder: "reelsFolder",
+                    format: "mp4", // 👈 ensures Cloudinary converts all videos to MP4
+                },
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                }
+            );
+            stream.end(req.file.buffer);
+        });
 
-    return res.status(200).json({ message: "Reel uploaded successfully", reel });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: "Failed to upload reel. Internal server error",
-    });
-  }
+        // creating in DB
+        const { title, description, tags, category } = req.body;
+        const reel = await Reel.create({
+            title,
+            description,
+            tags,
+            category,
+            videoUrl: result.secure_url,
+            creator: req.user._id,
+            thumbnail: req.body.thumbnail || "",
+        });
+
+        return res.status(200).json({ message: "Reel uploaded successfully", reel });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Failed to upload reel. Internal server error",
+        });
+    }
 };
 
 

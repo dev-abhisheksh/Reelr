@@ -122,7 +122,7 @@ const ProfilePage = () => {
       <div className="grid grid-cols-3 gap-1 mt-8 w-full max-w-md px-2">
         {reels.length > 0 && reels.map((reel, index) => (
           <div key={index}
-            className="aspect-square border border-white bg-gray-800 flex items-center justify-center text-gray-600 text-sm overflow-hidden"
+            className="aspect-square border border-white rounded-md bg-gray-800 flex items-center justify-center text-gray-600 text-sm overflow-hidden"
             onClick={() => {
               setSelectedReel(reel);
               setReelsModal(true);

@@ -15,5 +15,6 @@ router.patch("/update/:id", verifyJWT, allowRoles("creator", "admin"), updateRee
 router.get("/all-reels/:userId", verifyJWT, allowRoles("admin"), getReelsByUser)
 router.get("/popular", getTrendingReels)
 router.patch("/:reelId/views", incrementViews)
+router.post("/upload", verifyJWT, uploadReel)
 
 export default router
