@@ -145,7 +145,7 @@ const ProfilePage = () => {
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
           <div className="w-[92%] h-[90%] bg-[#1C1C1D] rounded-lg flex justify-center">
             <button
-              className="absolute right-2 top-5 h-10 w-10 rounded-full z-55 bg-gray-700 flex justify-center items-center"
+              className="absolute border right-2 top-5 h-10 w-10 rounded-full z-55 bg-gray-700 flex justify-center items-center"
               onClick={() => setReelsModal(false)}
             >
               <IoMdArrowRoundBack size={32} />

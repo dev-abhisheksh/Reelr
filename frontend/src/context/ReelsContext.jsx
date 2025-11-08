@@ -14,7 +14,7 @@ export const useReels = () => {
 export const ReelsProvider = ({ children }) => {
   const [reels, setReels] = useState([]);
   const [scrollPosition, setScrollPosition] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   // ✅ Persist viewedSet across navigation
@@ -29,13 +29,23 @@ export const ReelsProvider = ({ children }) => {
 
   const viewedSet = useRef(getInitialViewedSet());
 
-  // ✅ Fetch reels only once
+  const shuffleArray = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // ✅ Fetch reels only once and shuffle them
   useEffect(() => {
     if (reels.length === 0 && !isLoading) {
       setIsLoading(true);
       getAllReels()
         .then(res => {
-          setReels(res.data.allReels);
+          const shuffledReels = shuffleArray(res.data.allReels); // ✅ Shuffle here
+          setReels(shuffledReels);
         })
         .catch(err => console.error(err))
         .finally(() => setIsLoading(false));
@@ -68,6 +78,8 @@ export const ReelsProvider = ({ children }) => {
     return false; // Already viewed
   };
 
+
+
   const value = {
     reels,
     setReels,
@@ -78,7 +90,8 @@ export const ReelsProvider = ({ children }) => {
     viewedSet: viewedSet.current,
     markAsViewed,
     updateReelViews,
-    isLoading
+    isLoading,
+    shuffleArray
   };
 
   return (
