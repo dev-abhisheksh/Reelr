@@ -12,7 +12,8 @@ const uploadReel = async (req, res) => {
                 {
                     resource_type: "video",
                     folder: "reelsFolder",
-                    format: "mp4", // 👈 ensures Cloudinary converts all videos to MP4
+                    eager: [{ format: "mp4" }],
+                    eager_async: true,
                 },
                 (error, result) => {
                     if (error) reject(error);

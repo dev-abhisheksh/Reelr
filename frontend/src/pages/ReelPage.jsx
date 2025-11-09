@@ -5,18 +5,19 @@ import { FaHeart, FaRegCommentDots } from "react-icons/fa";
 import ImmersiveMode from '../components/ImmersiveMode';
 import { useImmersive } from '../components/ImmersiveMode'
 import { useReels } from '../context/ReelsContext';
+import { Volume2, VolumeX } from 'lucide-react';
 
 const HomePage = () => {
-    const { 
-        reels, 
-        isMuted, 
-        setIsMuted, 
-        markAsViewed, 
+    const {
+        reels,
+        isMuted,
+        setIsMuted,
+        markAsViewed,
         updateReelViews,
         scrollPosition,
-        setScrollPosition 
+        setScrollPosition
     } = useReels();
-    
+
     const videoRefs = useRef([])
     const containerRef = useRef(null);
     const { isImmersive } = useImmersive();
@@ -31,7 +32,7 @@ const HomePage = () => {
     // ✅ Save scroll position before unmounting
     useEffect(() => {
         const container = containerRef.current;
-        
+
         const handleScroll = () => {
             if (container) {
                 setScrollPosition(container.scrollTop);
@@ -99,7 +100,7 @@ const HomePage = () => {
     };
 
     return (
-        <div 
+        <div
             ref={containerRef}
             className="h-screen w-full bg-black overflow-y-scroll snap-y snap-mandatory"
         >
@@ -112,7 +113,7 @@ const HomePage = () => {
                         <video
                             ref={(el) => (videoRefs.current[index] = el)}
                             src={reel.videoUrl}
-                            className="h-full w-full object-cover"
+                            className="max-h-full max-w-full object-contain"
                             loop
                             muted
                             playsInline
@@ -129,21 +130,28 @@ const HomePage = () => {
                                 <div className='flex flex-col gap-4'>
                                     <div className="flex flex-col items-center justify-center gap-1">
                                         <div className="h-8 w-8 flex justify-center items-center">
-                                            <FaHeart className="text-red-500 text-[25px]" />
+                                            <FaHeart className="text-red-500 text-[25px] "
+                                                style={{ filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.8))' }}
+                                            />
                                         </div>
                                         <p className="text-white font-bold text-xs">0</p>
                                     </div>
 
                                     <div className="flex flex-col items-center justify-center gap-1">
                                         <div className="h-8 w-8 flex justify-center items-center">
-                                            <AiFillEye className="text-white text-[25px]" />
+                                            <AiFillEye
+                                                className="text-white text-[25px]"
+                                                style={{ filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.8))' }}
+                                            />
                                         </div>
                                         <p className="text-white font-bold text-xs">{reel.views ?? 0}</p>
                                     </div>
 
                                     <div className="flex flex-col items-center justify-center gap-1">
                                         <div className="h-8 w-8 flex justify-center items-center">
-                                            <FaRegCommentDots className="text-white text-[23px]" />
+                                            <FaRegCommentDots className="text-white text-[23px]"
+                                                style={{ filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.8))' }}
+                                            />
                                         </div>
                                         <p className="text-white font-bold text-xs">0</p>
                                     </div>
@@ -154,12 +162,13 @@ const HomePage = () => {
                         {/* Text overlay */}
                         <div className="absolute bottom-25 left-5 text-white">
                             <h1 className="text-lg font-semibold">@{reel.creator?.username}</h1>
-                            <p className="text-sm opacity-80">{reel.description}</p>
+                            {/* <h2 className="text-sm">{reel.title}</h2> */}
+                            <p className="pl-3 text-sm opacity-80">{reel.description}</p>
                         </div>
 
                         {/* Mute indicator */}
-                        <div className="absolute top-5 right-5 text-white bg-black/50 px-3 py-1 rounded-full text-sm">
-                            {isMuted ? "🔇" : "🔊"}
+                        <div className="absolute top-5 right-2 text-white bg-black/50 px-3 py-1 rounded-full text-sm">
+                            {isMuted ? <VolumeX /> : <Volume2 />}
                         </div>
                     </div>
                 ))
