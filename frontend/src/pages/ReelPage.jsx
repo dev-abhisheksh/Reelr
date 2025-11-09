@@ -102,7 +102,7 @@ const HomePage = () => {
     return (
         <div
             ref={containerRef}
-            className="h-screen w-full bg-black overflow-y-scroll snap-y snap-mandatory"
+            className="h-screen w-full bg-black overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
         >
             {reels.length > 0 ? (
                 reels.map((reel, index) => (

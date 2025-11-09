@@ -12,7 +12,8 @@ const uploadReel = async (req, res) => {
                 {
                     resource_type: "video",
                     folder: "reelsFolder",
-                    eager: [{ format: "mp4" }],
+                    // eager: [{ format: "mp4" }] ,
+                    format: "mp4",
                     eager_async: true,
                 },
                 (error, result) => {

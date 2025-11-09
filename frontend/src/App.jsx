@@ -11,6 +11,7 @@ import ReelPage from "./pages/ReelPage";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import { ReelsProvider } from "./context/ReelsContext";
 import RegisterPage from "./pages/RegisterPage";
+import { Toaster } from "sonner";
 
 
 
@@ -84,7 +85,9 @@ const App = () => {
           </div>
         )}
       </ImmersiveProvider>
+      <Toaster richColors position="top-right"/>
     </ReelsProvider>
+    
   );
 };
 

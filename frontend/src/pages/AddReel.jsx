@@ -1,6 +1,8 @@
 import React, { useState, useRef } from "react";
 import { uploadReel } from "../api/reels.api";
 import { FaCloudUploadAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { toast, Toaster } from "sonner";
 
 const AddReel = () => {
   const [videoFile, setVideoFile] = useState(null);
@@ -17,6 +19,8 @@ const AddReel = () => {
 
   const videoInputRef = useRef(null);
   const thumbnailInputRef = useRef(null);
+
+  const navigate = useNavigate();
 
   const handleVideoChange = (e) => {
     const file = e.target.files[0];
@@ -66,7 +70,10 @@ const AddReel = () => {
     try {
       const res = await uploadReel(formData);
       console.log("Uploaded:", res.data);
-      alert("Upload successful!");
+      <Toaster richColors position="top-right" />
+      toast.success("Reel Uploaded SuccessFull");
+      // alert("Upload successful!"); 
+      navigate("/");
     } catch (err) {
       console.error(err);
       setError("Upload failed. Try again.");
