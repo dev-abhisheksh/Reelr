@@ -70,28 +70,7 @@ const uploadUserImage = async (req, res) => {
     }
 };
 
-const getMyProfile = async (req, res) => {
-    try {
-        const user = await User.findById(req.user._id)
-            .select("-password -__v")
-            // .populate({
-            //     path: "watchHistory",
-            //     select: "title thumbnailUrl views likes",
-            // })
-            .lean();
 
-        res.status(200).json({
-            success: true,
-            user,
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Error fetching your profile",
-            error: error.message,
-        });
-    }
-};
 
 const updateProfile = async (req, res) => {
     try {
@@ -116,6 +95,29 @@ const updateProfile = async (req, res) => {
         })
     }
 }
+
+const getMyProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id)
+            .select("-password -__v")
+            // .populate({
+            //     path: "watchHistory",
+            //     select: "title thumbnailUrl views likes",
+            // })
+            .lean();
+
+        res.status(200).json({
+            success: true,
+            user,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error fetching your profile",
+            error: error.message,
+        });
+    }
+};
 
 const myReels = async (req, res) => {
     try {

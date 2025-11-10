@@ -127,13 +127,13 @@ const verifyUser = (req, res) => {
 const logoutUser = async (req, res) => {
     try {
         const userId = req.user?.id;
-        console.log("REQ.USER IN LOGOUT:", req.user);
+        // console.log("REQ.USER IN LOGOUT:", req.user);
 
         // Just clear the cookies - no database operation needed
         const cookieOptions = {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: 'strict',
+            sameSite: 'none',
             path: '/'
         };
 
