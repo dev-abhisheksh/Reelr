@@ -3,28 +3,24 @@ import { verifyUser } from "../api/auth.api";
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoutes = ({ children }) => {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [auth, setAuth] = useState(null); // null = loading, true/false = ready
 
   useEffect(() => {
-    const verify = async () => {
+    const checkAuth = async () => {
       try {
         const res = await verifyUser();
-        setAuthenticated(res.data.success);
-      } catch (error) {
-        setAuthenticated(false);
-      } finally {
-        setLoading(false);
+        setAuth(!!res.data.user);
+      } catch {
+        setAuth(false);
       }
     };
-    verify();
+
+    checkAuth();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (!authenticated) return <Navigate to="/login" replace />;
-  
-  // ✅ Render the children properly
-  return children;
+  if (auth === null) return <div className="text-center mt-10">Loading...</div>;
+
+  return auth ? children : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoutes;

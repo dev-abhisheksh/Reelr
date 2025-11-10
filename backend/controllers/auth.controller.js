@@ -115,7 +115,6 @@ const loginUser = async (req, res) => {
     }
 };
 
-// verify logged-in user (used for cookie-based auth check)
 const verifyUser = (req, res) => {
     return res.status(200).json({
         success: true,
@@ -124,30 +123,35 @@ const verifyUser = (req, res) => {
     });
 };
 
+
 const logoutUser = async (req, res) => {
     try {
         const userId = req.user?.id;
+        console.log("REQ.USER IN LOGOUT:", req.user);
 
-        res.clearCookie('accessToken', {
+        // Just clear the cookies - no database operation needed
+        const cookieOptions = {
             httpOnly: true,
-            secure: true,
-            sameSite: 'strict'
-        })
+            secure: process.env.NODE_ENV === "production",
+            sameSite: 'strict',
+            path: '/'
+        };
 
-        res.clearCookie('refreshToken', {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'strict'
-        })
+        res.clearCookie('accessToken', cookieOptions);
+        res.clearCookie('refreshToken', cookieOptions);
 
-        return res.status(200).json({ message: "User logged out succesfully", success: true })
+        return res.status(200).json({
+            message: "User logged out successfully",
+            success: true
+        });
     } catch (error) {
+        console.error("Logout error:", error);
         return res.status(500).json({
             success: false,
             message: 'Logout failed'
         });
     }
-}
+};
 
 export {
     registerUser,
