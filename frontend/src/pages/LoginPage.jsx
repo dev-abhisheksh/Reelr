@@ -16,8 +16,8 @@ const LoginPage = () => {
 
         try {
             const res = await loginUser({ email, password })
-                // console.log("Login response:", res);
-                    toast.success("LoggedIn Success")
+            // console.log("Login response:", res);
+            toast.success("User Logged In successfully")
             navigate("/")
         } catch (error) {
             console.error("Login error:", error);

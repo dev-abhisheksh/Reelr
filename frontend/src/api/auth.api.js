@@ -12,3 +12,7 @@ export const verifyUser = () =>
 export const registerUser = (data) => {
   return axios.post(`${BASE_URL}/register`, data, { withCredentials: true });
 };
+
+export const logout = () => {
+  axios.get(`${BASE_URL}/logout`, { withCredentials: true })
+}

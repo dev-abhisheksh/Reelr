@@ -124,9 +124,34 @@ const verifyUser = (req, res) => {
     });
 };
 
+const logoutUser = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+
+        res.clearCookie('accessToken', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict'
+        })
+
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict'
+        })
+
+        return res.status(200).json({ message: "User logged out succesfully", success: true })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Logout failed'
+        });
+    }
+}
 
 export {
     registerUser,
     loginUser,
-    verifyUser
+    verifyUser,
+    logoutUser
 }

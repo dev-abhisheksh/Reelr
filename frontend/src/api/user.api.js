@@ -27,3 +27,20 @@ export const myReels = async () => {
         throw error;
     }
 }
+
+export const updateProfileData = async (fullName, bio) => {
+    return API.post("/update-profile", { fullName, bio });
+};
+
+
+export const profileImagesUpload = async (file, type) => {
+    const form = new FormData();
+    form.append("image", file);
+    form.append("type", type);
+
+    return await API.post("/upload-image", form, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+};
