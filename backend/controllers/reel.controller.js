@@ -12,8 +12,12 @@ const uploadReel = async (req, res) => {
                 {
                     resource_type: "video",
                     folder: "reelsFolder",
-                    // eager: [{ format: "mp4" }] ,
-                    format: "mp4",
+                    eager: [
+                        {
+                            format: "mp4",
+                            quality: "auto"
+                        }
+                    ],
                     eager_async: true,
                 },
                 (error, result) => {
@@ -33,7 +37,7 @@ const uploadReel = async (req, res) => {
             category,
             videoUrl: result.secure_url,
             creator: req.user._id,
-            thumbnail: req.body.thumbnail || "",
+            thumbnail: req.body.thumbnail || result.eager?.[0]?.secure_url || "",
         });
 
         return res.status(200).json({ message: "Reel uploaded successfully", reel });
