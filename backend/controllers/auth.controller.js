@@ -58,7 +58,7 @@ const registerUser = async (req, res) => {
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
             secure: true,
-            sameSite: "None",
+            sameSite: "none",
         })
 
         res.status(201).json({ message: "User registered successfully", createdUser, accessToken, refreshToken })
@@ -96,18 +96,22 @@ const loginUser = async (req, res) => {
         // 4. Send access token as HTTP-only cookie
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            secure: true, // ❗ change to true in production (https)
-            sameSite: "none", // use "none" + secure:true in production
+            secure: true,
+            sameSite: "none",
             maxAge: 24 * 60 * 60 * 1000, // 1 day
         });
 
-        // 5. Return user data (no tokens in response)
+        // 5. Return user data WITH token for socket connection
         const loggedInUser = await User.findById(user._id).select("-password");
 
-        return res.status(200).json({
+        res.json({
             success: true,
-            message: "Login successful",
-            user: loggedInUser,
+            user: {
+                id: user._id,
+                email: user.email,
+                name: user.name
+            },
+            token: accessToken // ✅ Changed from "token: token" to "token: accessToken"
         });
     } catch (error) {
         console.error("Login error:", error);
@@ -132,7 +136,7 @@ const logoutUser = async (req, res) => {
         // Just clear the cookies - no database operation needed
         const cookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: true,
             sameSite: 'none',
             path: '/'
         };

@@ -6,7 +6,7 @@ import { deleteReel, getAllReels, getReelById, getReelsByUser, updateReel, uploa
 
 const router = express.Router();
 
-router.post("/upload", verifyJWT, allowRoles("creator", "admin"), upload.single("video"), uploadReel)
+router.post("/upload", verifyJWT, upload.single("video"), uploadReel)
 
 router.get("/all", getAllReels)
 router.delete("/delete/:id", verifyJWT, allowRoles("creator", "admin"), deleteReel)
