@@ -42,7 +42,7 @@ const uploadReel = async (req, res) => {
 
         return res.status(200).json({ message: "Reel uploaded successfully", reel });
     } catch (error) {
-        console.error(error);
+        console.error(error.message);
         return res.status(500).json({
             message: "Failed to upload reel. Internal server error",
         });
