@@ -1,18 +1,26 @@
 // src/api/auth.api.js
 import axios from "axios";
 
-const BASE_URL = "https://reelr.onrender.com/auth"  /*"http://localhost:8000/auth"*/;
+const getToken = () => localStorage.getItem("accessToken");
 
-export const loginUser = (data) =>
-  axios.post(`${BASE_URL}/login`, data, { withCredentials: true });
+const API = axios.create({
+  baseURL: "https://reelr.onrender.com/auth",
+});
 
-export const verifyUser = () =>
-  axios.get(`${BASE_URL}/verify`, { withCredentials: true }); // ✅
+// ✅ Attach Bearer token to all requests automatically
+API.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-export const registerUser = (data) => {
-  return axios.post(`${BASE_URL}/register`, data, { withCredentials: true });
-};
+export const loginUser = (data) => API.post("/login", data);
 
-export const logout = () => {
-  axios.get(`${BASE_URL}/logout`, { withCredentials: true })
-}
+export const verifyUser = () => API.get("/verify");
+
+export const registerUser = (data) => API.post("/register", data);
+
+export const logout = () => API.get("/logout");
+

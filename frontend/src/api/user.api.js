@@ -1,9 +1,20 @@
 import axios from "axios";
 
+// Get token from localStorage (you’ll store it after login)
+const getToken = () => localStorage.getItem("accessToken");
+
 const API = axios.create({
     baseURL: "https://reelr.onrender.com/user",
-    withCredentials: true,
 });
+
+// Interceptor to attach token automatically
+API.interceptors.request.use((config) => {
+    const token = getToken();
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+}, (error) => Promise.reject(error));
 
 export const userProfile = async () => {
     try {
@@ -19,19 +30,17 @@ export const userProfile = async () => {
 
 export const myReels = async () => {
     try {
-        const res = await API.get("/my-reels", { withCredentials: true })
-        const reelsData = res.data;
-        return reelsData;
+        const res = await API.get("/my-reels");
+        return res.data;
     } catch (error) {
-        console.error("Error fetching user reels", error)
+        console.error("Error fetching user reels", error);
         throw error;
     }
-}
+};
 
 export const updateProfileData = async (fullName, bio) => {
     return API.post("/update-profile", { fullName, bio });
 };
-
 
 export const profileImagesUpload = async (file, type) => {
     const form = new FormData();
@@ -39,8 +48,6 @@ export const profileImagesUpload = async (file, type) => {
     form.append("type", type);
 
     return await API.post("/upload-image", form, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
     });
 };

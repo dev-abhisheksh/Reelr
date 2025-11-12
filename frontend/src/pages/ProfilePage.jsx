@@ -7,9 +7,10 @@ import {
 } from "../api/user.api";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { LogOut, SquarePen, X } from "lucide-react";
-import { logout } from "../api/auth.api";
+
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { logout } from "../api/auth.api";
 
 const ProfilePage = () => {
   const [userDetails, setUserDetails] = useState(null);
@@ -117,10 +118,21 @@ const ProfilePage = () => {
     fetchUserReels();
   }, []);
 
-  const userLogOut = async () => {
-    await logout();
-    toast.success("Logged out");
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await logout(); // optional backend call
+
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+
+      // clear user context/state if you have one
+      // setUser(null);
+
+      // redirect
+      window.location.href = "/login";
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   };
 
   if (!userDetails) {
@@ -137,7 +149,7 @@ const ProfilePage = () => {
       <div className="w-full absolute h-6 px-5 top-5 z-20 flex justify-between items-center">
         <div
           className="bg-gray-900 rounded-md p-2 flex justify-center items-center hover:bg-orange-500 transition-colors duration-300"
-          onClick={userLogOut}
+          onClick={handleLogout}
         >
           <LogOut />
         </div>

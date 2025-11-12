@@ -93,26 +93,15 @@ const loginUser = async (req, res) => {
         const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user);
 
-        // 4. Send access token as HTTP-only cookie
-        res.cookie("accessToken", accessToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            maxAge: 24 * 60 * 60 * 1000, // 1 day
-        });
-
-        // 5. Return user data WITH token for socket connection
-        const loggedInUser = await User.findById(user._id).select("-password");
-
         res.json({
             success: true,
             user: {
                 id: user._id,
                 email: user.email,
-                name: user.name
             },
-            token: accessToken // ✅ Changed from "token: token" to "token: accessToken"
-        });
+            accessToken,
+            refreshToken
+        })
     } catch (error) {
         console.error("Login error:", error);
         return res.status(500).json({ message: "Failed to log in user" });
@@ -120,11 +109,18 @@ const loginUser = async (req, res) => {
 };
 
 const verifyUser = (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({
+            success: false,
+            message: "user not authenticated"
+        });
+    }
+
     return res.status(200).json({
         success: true,
         message: "User authenticated",
-        user: req.user,
-    });
+        user: req.user
+    })
 };
 
 

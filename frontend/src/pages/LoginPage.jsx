@@ -11,20 +11,25 @@ const LoginPage = () => {
     const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
-        setLoading(true)
+        e.preventDefault();
+        setLoading(true);
 
         try {
-            const res = await loginUser({ email, password })
-            // console.log("Login response:", res);
-            toast.success("User Logged In successfully")
-            navigate("/")
+            const res = await loginUser({ email, password });
+            const { accessToken } = res.data;
+
+            // console.log("Access Token Stored:", accessToken);
+            localStorage.setItem("accessToken", accessToken);
+
+            toast.success("User Logged In successfully");
+            navigate("/");
         } catch (error) {
             console.error("Login error:", error);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
+
 
 
 

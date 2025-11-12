@@ -1,10 +1,19 @@
 import axios from "axios";
 
+const getToken = () => localStorage.getItem("accessToken")
+
 const API = axios.create({
-    baseURL: "https://reelr.onrender.com/api/reel",
-    withCredentials: true,
+    baseURL: "https://reelr.onrender.com/api/reel"  /*"https://reelr.onrender.com/auth"*/
 })
 
-export const uploadReel = (formData)=>API.post("/upload",formData)
-export const getAllReels = ()=> API.get("/all")
+API.interceptors.request.use((config) => {
+    const token = getToken();
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+})
+
+export const uploadReel = (formData) => API.post("/upload", formData)
+export const getAllReels = () => API.get("/all")
 export const incrementReelView = (reelId) => API.patch(`/${reelId}/views`);
