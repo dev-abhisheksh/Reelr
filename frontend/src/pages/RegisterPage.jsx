@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { registerUser } from "../api/auth.api";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const RegisterPage = () => {
   const [username, setUsername] = useState("");
@@ -13,6 +14,7 @@ const RegisterPage = () => {
     e.preventDefault();
     try {
       const res = await registerUser({ email, password, username, fullName, role: "viewer" });
+      toast.success("Registration successful! Please login.");
       navigate("/login");
     } catch (error) {
       console.error("Register error", error);

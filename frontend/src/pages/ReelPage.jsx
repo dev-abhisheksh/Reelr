@@ -124,9 +124,9 @@ const HomePage = () => {
                             <ImmersiveMode />
                         </div>
 
-                        {/* Side icons */}
+                        {/* Side icons - FIXED: Changed from bottom-40 to bottom-56 */}
                         <div className={`flex justify-center py-2 transition-all duration-300 ${isImmersive ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                            <div className='absolute right-5 bottom-40'>
+                            <div className='absolute right-5 bottom-56'>
                                 <div className='flex flex-col gap-4'>
                                     <div className="flex flex-col items-center justify-center gap-1">
                                         <div className="h-8 w-8 flex justify-center items-center">
@@ -159,8 +159,8 @@ const HomePage = () => {
                             </div>
                         </div>
 
-                        {/* Text overlay */}
-                        <div className="absolute bottom-25 left-5 text-white">
+                        {/* Text overlay - FIXED: Changed from bottom-25 to bottom-36 */}
+                        <div className="absolute bottom-36 left-5 text-white">
                             <h1 className="text-lg font-semibold">@{reel.creator?.username}</h1>
                             {/* <h2 className="text-sm">{reel.title}</h2> */}
                             <p className="pl-3 text-sm opacity-80">{reel.description}</p>
@@ -168,7 +168,7 @@ const HomePage = () => {
 
                         {/* Mute indicator */}
                         <div className="absolute top-5 right-2 text-white bg-black/50 px-3 py-1 rounded-full text-sm">
-                            {isMuted ? <VolumeX /> : <Volume2 />}
+                            {isMuted ? <VolumeX onClick={toggleMute}/> : <Volume2 onClick={toggleMute}/>}
                         </div>
                     </div>
                 ))

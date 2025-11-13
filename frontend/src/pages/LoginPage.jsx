@@ -24,6 +24,7 @@ const LoginPage = () => {
             toast.success("User Logged In successfully");
             navigate("/");
         } catch (error) {
+            toast.error("Failed to login. Please check your credentials.");
             console.error("Login error:", error);
         } finally {
             setLoading(false);

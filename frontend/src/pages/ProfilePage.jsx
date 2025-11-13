@@ -127,6 +127,7 @@ const ProfilePage = () => {
 
       // clear user context/state if you have one
       // setUser(null);
+      toast.success("Logged out successfully");
 
       // redirect
       window.location.href = "/login";
