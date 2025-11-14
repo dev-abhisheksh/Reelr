@@ -51,3 +51,11 @@ export const profileImagesUpload = async (file, type) => {
         headers: { "Content-Type": "multipart/form-data" },
     });
 };
+
+export const Friends = async () => {
+    return API.get("/friends")
+}
+
+export const SearchUsers = async (query) => {
+    return API.get(`/search-users?query=${query}`)
+}  

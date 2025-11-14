@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
+import { User } from "../models/user.model.js"; // Import User model
 
-const verifyJWT = (req, res, next) => {
+const verifyJWT = async (req, res, next) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
 
   if (!authHeader?.startsWith("Bearer ")) {
@@ -9,11 +10,22 @@ const verifyJWT = (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
     if (err) return res.status(401).json({ message: "Invalid token" });
 
-    req.user = decoded;
-    next();
+    try {
+      // Fetch full user from database including friends array
+      const user = await User.findById(decoded._id).select("-password");
+      
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      req.user = user; // Now has friends array
+      next();
+    } catch (error) {
+      return res.status(500).json({ message: "Server error" });
+    }
   });
 };
 

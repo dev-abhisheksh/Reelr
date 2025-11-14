@@ -1,6 +1,7 @@
 import cloudinary from "../config/cloudinary.js";
 import { User } from "../models/user.model.js";
 import { Reel } from "../models/reels.model.js";
+import { response } from "express";
 
 const uploadUserImage = async (req, res) => {
     try {
@@ -134,10 +135,116 @@ const myReels = async (req, res) => {
     }
 };
 
+const addFriend = async (req, res) => {
+    try {
+        const { friendId } = req.body;
+        const currentUserId = req.user._id;
+
+        if (!friendId) return res.status(400).json({ message: "Friend Id is required" })
+
+        if (friendId === currentUserId.toString()) return res.status(400).json({ message: "I know your lonely but u cant add yrself as friend" })
+
+        //check if ffriend exists
+        const friendUser = await User.findById(friendId)
+        if (!friendUser) return res.status(404).json({ message: "User not found" });
+
+        //check if user is already a friend
+        if (req.user.friends.includes(friendId)) return req.status(400).json({ message: "Already friends" })
+
+        await User.findByIdAndUpdate(currentUserId, {
+            $addToSet: { friends: friendId }
+        })
+
+        await User.findByIdAndUpdate(friendId, {
+            $addToSet: { friends: currentUserId }
+        })
+
+        res.status(200).json({ message: "Friend added successfully" })
+    } catch (error) {
+        res.status(500).json({ messsage: "Error adding friend", error: error.message })
+    }
+}
+
+const getAllFriends = async (req, res) => {
+    try {
+        const currentUserId = req.user._id;
+        const user = await User.findById(currentUserId)
+            .populate("friends", "username fullName profileImage bio")
+            .select("friends")
+
+        res.status(200).json(user.friends)
+    } catch (error) {
+        res.status(500).json({ message: "Failed to fetch friends list" })
+    }
+}
+
+const removeFriend = async (req, res) => {
+    try {
+        const { friendId } = req.params;
+        const currentUserId = req.user._id;
+
+        if (!friendId) return res.status(400).json({ message: "Friend ID is required" })
+
+        const userExists = await User.findById(friendId);
+        if (!userExists) return res.status(404).json({ message: "user not found" })
+
+        if (!req.user.friends.includes(friendId)) return res.status(400).json({ message: "User is not a friend" })
+
+        await User.findByIdAndUpdate(currentUserId, {
+            $pull: { friends: friendId }
+        })
+
+        await User.findByIdAndUpdate(friendId, {
+            $pull: { friends: currentUserId }
+        })
+
+        res.status(200).json({ message: "Friend removed successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error removing friend", error: error.message });
+    }
+}
+
+const searchUsers = async (req, res) => {
+    try {
+        const { query } = req.query;
+        const currentUserId = req.user._id
+
+        if (!query || query.trim() === "") {
+            return res.status(400).json({ message: "Search query is required" });
+        }
+
+        const users = await User.find({
+            username: { $regex: query, $options: "i" },
+            _id: {
+                $ne: currentUserId
+            }
+        })
+            .select("username fullName profileImage bio")
+            .limit(10)
+
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ message: "Error searching users", error: error.message });
+    }
+}
+
+const allUsers = async (req, res) => {
+    try {
+        const users = await User.find().select("-password");
+        res.status(200).json(users)
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching users", error: error.message })
+    }
+}
 
 export {
     uploadUserImage,
     getMyProfile,
     updateProfile,
-    myReels
+    myReels,
+    addFriend,
+    removeFriend,
+    searchUsers,
+    getAllFriends,
+    allUsers
 }
