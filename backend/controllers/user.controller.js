@@ -237,6 +237,31 @@ const allUsers = async (req, res) => {
     }
 }
 
+const getUserProfile = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const user = await User.findById(userId)
+            .select("-password -__v")
+            // .populate({
+            //     path: "watchHistory",
+            //     select: "title thumbnailUrl views likes",
+            // })
+            .lean();
+
+        res.status(200).json({
+            success: true,
+            user,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error fetching user profile",
+            error: error.message,
+        });
+    }
+};
+
+
 export {
     uploadUserImage,
     getMyProfile,
@@ -246,5 +271,6 @@ export {
     removeFriend,
     searchUsers,
     getAllFriends,
-    allUsers
+    allUsers,
+    getUserProfile,
 }

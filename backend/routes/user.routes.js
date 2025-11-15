@@ -2,7 +2,7 @@ import express from "express"
 import { upload } from "../config/multer.js";
 import verifyJWT from "../middlewares/auth.middleware.js";
 import allowRoles from "../middlewares/role.middleware.js";
-import { addFriend, allUsers, getAllFriends, getMyProfile, myReels, removeFriend, searchUsers, updateProfile, uploadUserImage } from "../controllers/user.controller.js";
+import { addFriend, allUsers, getAllFriends, getMyProfile, getUserProfile, myReels, removeFriend, searchUsers, updateProfile, uploadUserImage } from "../controllers/user.controller.js";
 import { uploadReel } from "../controllers/reel.controller.js";
 
 const router = express.Router();
@@ -17,5 +17,7 @@ router.post("/friends-add", verifyJWT, addFriend)
 router.delete("/friend-remove/:friendId", verifyJWT, removeFriend)
 router.get("/search-users", verifyJWT, searchUsers)
 router.get("/all-users", verifyJWT, allUsers)
+router.get("/user-profile/:userId", verifyJWT, getUserProfile)
+
 
 export default router

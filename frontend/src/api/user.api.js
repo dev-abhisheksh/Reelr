@@ -58,4 +58,8 @@ export const Friends = async () => {
 
 export const SearchUsers = async (query) => {
     return API.get(`/search-users?query=${query}`)
-}  
+}
+
+export const getUserProfileById = async (userId) => {
+    return API.get(`/user-profile/${userId}`)
+}
