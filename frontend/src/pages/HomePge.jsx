@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { IoMdArrowRoundBack } from 'react-icons/io'
-import { Friends, SearchUsers, getUserProfileById } from '../api/user.api'
+import { Friends, SearchUsers, addFriend, checkFriendStatus, getUserProfileById } from '../api/user.api'
 import { getReelById } from '../api/reels.api'
+import { UserMinus, UserPlus } from 'lucide-react'
 
 const HomePage = () => {
   const [friends, setFriends] = useState([])
@@ -16,6 +17,32 @@ const HomePage = () => {
   const [reelsModal, setReelsModal] = useState(false)
   const [selectedReel, setSelectedReel] = useState(null)
   const [loading, setLoading] = useState(false)
+  // const [userId, setUserId] = useState("")
+  const [isFriend, setIsFriend] = useState(false)
+
+  useEffect(() => {
+    const fetchFriendship = async () => {
+      try {
+        const res = await checkFriendStatus(selectedUserId);
+        setIsFriend(res.data.isFriend);
+      } catch (err) {
+        console.error("Failed to check friend status", err);
+      }
+    };
+
+    if (selectedUserId) fetchFriendship();
+  }, [selectedUserId]);
+
+
+
+  const handleAddFriend = async (friendId) => {
+    try {
+      await addFriend(friendId)
+      console.log("Friend added successfully")
+    } catch (error) {
+      console.error("Error adding friend:", error);
+    }
+  }
 
   // 🔎 Live Search Effect
   useEffect(() => {
@@ -132,6 +159,7 @@ const HomePage = () => {
               key={friend._id}
               className="flex items-center gap-4 p-3 rounded-xl hover:bg-[#262626] transition cursor-pointer"
               onClick={() => handleUserClick(friend._id)}
+            // setUserId={friend._id}
             >
               <img
                 src={friend.profileImage || "https://res.cloudinary.com/dranpsjot/image/upload/v1762681550/hi_i7mwyu.jpg"}
@@ -151,12 +179,34 @@ const HomePage = () => {
           <div className="min-h-screen flex flex-col items-center w-full">
 
             {/* Close Button */}
-            <button
-              className="absolute left-4 top-4 h-10 w-10 rounded-full bg-gray-800/70 hover:bg-gray-700 flex justify-center items-center transition-colors z-20"
-              onClick={closeModal}
-            >
-              <IoMdArrowRoundBack size={28} className="text-white" />
-            </button>
+            <div>
+              <button
+                className="absolute left-4 top-4 h-10 w-10 rounded-full bg-gray-800/70 hover:bg-gray-700 flex justify-center items-center transition-colors z-20"
+                onClick={closeModal}
+              >
+                <IoMdArrowRoundBack size={28} className="text-white" />
+              </button>
+              <div
+
+                className=' absolute right-4 top-4 h-10 px rounded-full bg-gray-800/70 hover:bg-gray-700 flex justify-center items-center transition-colors z-20'>
+                <div className='flex justify-center items-center gap-2 px-3'>
+                  {isFriend ? (
+                    <div className='flex gap-2 justify-center items-center'>
+                      <UserMinus size={20} className="text-white font-bold" />
+                      <span className='text-white'>Remove</span>
+                    </div>
+                  ) : (
+                    <div onClick={() => addFriend(selectedUserId)}
+                      className='flex gap-2'>
+                      <UserPlus size={20} className="text-white font-bold" />
+                      <span className='text-white'>Add Friend</span>
+                    </div>
+                  )}
+
+                </div>
+              </div>
+
+            </div>
 
             {loading ? (
               <div className="flex items-center justify-center h-screen">
@@ -167,6 +217,7 @@ const HomePage = () => {
                 {/* Cover */}
                 <div className="relative h-auto w-full">
                   <div className="w-full h-48 bg-gray-800 overflow-hidden">
+
                     <img
                       src={
                         userDetails.coverImage ||
@@ -174,7 +225,9 @@ const HomePage = () => {
                       }
                       alt="cover"
                       className="w-full h-full object-cover"
+
                     />
+
                   </div>
 
                   {/* Profile image */}
@@ -190,11 +243,13 @@ const HomePage = () => {
 
                     {/* Info */}
                     <div className="flex flex-col items-center gap-2 mt-3">
-                      <div className="flex gap-5 items-center">
+
+                      <div className="flex gap-5 items-center justify-center">
                         <h2 className="text-xl font-semibold text-white">
                           {userDetails?.fullName}
                         </h2>
                         <p className="text-gray-400 text-sm">@{userDetails?.username}</p>
+
                       </div>
                       <p className="text-sm text-gray-300 max-w-xs text-center px-4 mt-2">
                         {userDetails?.bio || "No bio yet"}

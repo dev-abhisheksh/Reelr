@@ -63,3 +63,11 @@ export const SearchUsers = async (query) => {
 export const getUserProfileById = async (userId) => {
     return API.get(`/user-profile/${userId}`)
 }
+
+export const addFriend = async (friendId) => {
+    return API.post(`/friends-add/${friendId}`)
+}
+
+export const checkFriendStatus = async (userId) => {
+    return API.get(`/check-friendship/${userId}`)
+}

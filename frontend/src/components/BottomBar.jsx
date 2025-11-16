@@ -4,12 +4,13 @@ import { FaRegUserCircle, FaSearch } from "react-icons/fa";
 import { MdAddCircleOutline, MdSlowMotionVideo } from "react-icons/md";
 import { useImmersive } from './ImmersiveMode';
 import { NavLink } from 'react-router-dom';
+import { MessageCircle } from 'lucide-react';
 
 const BottomBar = () => {
     const { isImmersive } = useImmersive();
 
     const links = [
-        { to: "/home", icon: <HiHome size={25} /> },
+        { to: "/chat", icon: <MessageCircle size={25} /> },
         { to: "/upload", icon: <MdAddCircleOutline size={26} /> },
         { to: "/search", icon: <FaSearch size={20} /> },
         { to: "/", icon: <MdSlowMotionVideo size={26} /> },

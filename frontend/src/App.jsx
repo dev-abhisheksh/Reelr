@@ -37,7 +37,7 @@ const App = () => {
               }
             />
             <Route
-              path="/home"
+              path="chat"
               element={
                 <ProtectedRoutes>
                   <HomePge />

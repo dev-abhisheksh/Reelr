@@ -1,7 +1,7 @@
 import cloudinary from "../config/cloudinary.js";
 import { User } from "../models/user.model.js";
 import { Reel } from "../models/reels.model.js";
-import { response } from "express";
+
 
 const uploadUserImage = async (req, res) => {
     try {
@@ -71,8 +71,6 @@ const uploadUserImage = async (req, res) => {
     }
 };
 
-
-
 const updateProfile = async (req, res) => {
     try {
         const { bio, fullName } = req.body;
@@ -137,7 +135,7 @@ const myReels = async (req, res) => {
 
 const addFriend = async (req, res) => {
     try {
-        const { friendId } = req.body;
+        const { friendId } = req.params;
         const currentUserId = req.user._id;
 
         if (!friendId) return res.status(400).json({ message: "Friend Id is required" })
@@ -149,7 +147,9 @@ const addFriend = async (req, res) => {
         if (!friendUser) return res.status(404).json({ message: "User not found" });
 
         //check if user is already a friend
-        if (req.user.friends.includes(friendId)) return req.status(400).json({ message: "Already friends" })
+        if (req.user.friends.some(id => id.toString() === friendId))
+            return res.status(400).json({ message: "Already friends" });
+
 
         await User.findByIdAndUpdate(currentUserId, {
             $addToSet: { friends: friendId }
@@ -261,6 +261,33 @@ const getUserProfile = async (req, res) => {
     }
 };
 
+const checkFriendStatus = async (req, res) => {
+    try {
+        const { friendId } = req.params;
+        const currentUserId = req.user._id;
+
+        if (!friendId) {
+            return res.status(400).json({ isFriend: false, message: "Friend ID missing" });
+        }
+
+        const currentUser = await User.findById(currentUserId).select("friends");
+
+        if (!currentUser || !currentUser.friends) {
+            return res.status(200).json({ isFriend: false });
+        }
+
+        const isFriend = currentUser.friends
+            .map(id => id.toString())
+            .includes(friendId.toString());
+
+        return res.status(200).json({ isFriend });
+
+    } catch (error) {
+        console.error("CHECK FRIENDSHIP ERROR:", error);
+        return res.status(500).json({ isFriend: false, error: error.message });
+    }
+};
+
 
 export {
     uploadUserImage,
@@ -273,4 +300,5 @@ export {
     getAllFriends,
     allUsers,
     getUserProfile,
+    checkFriendStatus
 }
