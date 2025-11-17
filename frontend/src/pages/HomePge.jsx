@@ -249,7 +249,7 @@ const HomePage = () => {
         </div>
 
         {/* Message Input */}
-        <div className="flex items-center gap-3 p-4 border-t border-gray-700 pb-20">
+        <div className="flex items-center gap-3 p-4 border-t border-gray-700 pb-30">
           <input
             className="flex-1 p-3 bg-gray-800 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
             value={messageInput}
