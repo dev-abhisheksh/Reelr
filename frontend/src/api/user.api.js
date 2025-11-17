@@ -71,3 +71,7 @@ export const addFriend = async (friendId) => {
 export const checkFriendStatus = async (userId) => {
     return API.get(`/check-friendship/${userId}`)
 }
+
+export const removeFriend = async (friendId) => {
+    return API.delete(`friend-remove/${friendId}`)
+}
