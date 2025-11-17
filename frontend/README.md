@@ -1,16 +1,31 @@
-# React + Vite
+<h1 align="center">Welcome to Reelr 👋</h1>
+<p>
+  <img alt="Version" src="https://img.shields.io/badge/version-0.0.0-blue.svg?cacheSeconds=2592000" />
+  <a href=" " target="_blank">
+    <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
+  </a>
+</p>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> A social media app used to watch , upload reels and also have chat feature
 
-Currently, two official plugins are available:
+### 🏠 [Homepage]( )
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### ✨ [Demo](reelr.vercel.app)
 
-## React Compiler
+## Install
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```sh
+npm install
+```
 
-## Expanding the ESLint configuration
+## Author
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+👤 **Abhishek**
+
+* Website:  
+* Github: [@dev-abhisheksh](https://github.com/dev-abhisheksh)
+* LinkedIn: [@Abhishek Sharma](https://linkedin.com/in/Abhishek Sharma)
+
+## Show your support
+
+Give a ⭐️ if this project helped you!
