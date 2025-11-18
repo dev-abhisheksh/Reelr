@@ -9,9 +9,9 @@ const router = express.Router();
 router.post("/upload", verifyJWT, upload.single("video"), uploadReel)
 
 router.get("/all", getAllReels)
-router.delete("/delete/:id", verifyJWT, allowRoles("creator", "admin"), deleteReel)
+router.delete("/delete/:id", verifyJWT, deleteReel)
 router.get("/single-reel/:id", verifyJWT, getReelById)
-router.patch("/update/:id", verifyJWT, allowRoles("creator", "admin"), updateReel)
+router.patch("/update/:id", verifyJWT, updateReel)
 router.get("/all-reels/:userId", verifyJWT, getReelsByUser)
 router.get("/popular", getTrendingReels)
 router.patch("/:reelId/views", incrementViews)

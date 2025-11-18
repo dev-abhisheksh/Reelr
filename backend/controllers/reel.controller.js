@@ -138,12 +138,13 @@ const updateReel = async (req, res) => {
             return res.status(404).json({ message: "Reel not found" });
         }
 
+        console.log('Reel updated successfully');
         return res.status(200).json({
             message: "Reel updated successfully",
             updatedReel,
         });
     } catch (error) {
-        console.error(error);
+        console.error('Update reel error:', error);
         return res.status(500).json({ message: "Failed to update reel" });
     }
 };

@@ -18,3 +18,6 @@ export const uploadReel = (formData) => API.post("/upload", formData)
 export const getAllReels = () => API.get("/all")
 export const incrementReelView = (reelId) => API.patch(`/${reelId}/views`);
 export const getReelById = (userId) => API.get(`/all-reels/${userId}`);
+export const updateReel = async (reelId, data) => {
+    await API.patch(`/update/${reelId}`, data);
+};

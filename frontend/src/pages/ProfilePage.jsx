@@ -11,6 +11,7 @@ import { LogOut, SquarePen, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { logout } from "../api/auth.api";
+import { updateReel } from "../api/reels.api";
 
 const ProfilePage = () => {
   const [userDetails, setUserDetails] = useState(null);
@@ -28,6 +29,39 @@ const ProfilePage = () => {
 
   const profileRef = useRef(null);
   const coverRef = useRef(null);
+
+  const [isEditing, setisEditing] = useState(false)
+  const [editTitle, setEditTitle] = useState("")
+  const [editDescription, setEditDescription] = useState("")
+
+  const handleSaveReelUpdates = async () => {
+    try {
+      const data = {
+        title: editTitle,
+        description: editDescription,
+      };
+      await updateReel(selectedReel._id, data);
+
+      setisEditing(false);
+      setSelectedReel((prev) => ({
+        ...prev,
+        title: editTitle,
+        description: editDescription,
+      }));
+
+      setReels((prevReels) =>
+        prevReels.map((reel) =>
+          reel._id === selectedReel._id
+            ? { ...reel, title: editTitle, description: editDescription }
+            : reel
+        )
+      );
+      toast.success("Reel updated successfully");
+    } catch (err) {
+      toast.error(errorMsg);
+    }
+  };
+
 
   // ✅ Upload profile picture
   const handleProfileImage = async (e) => {
@@ -243,6 +277,9 @@ const ProfilePage = () => {
               className="aspect-square border border-white rounded-md bg-gray-800 overflow-hidden"
               onClick={() => {
                 setSelectedReel(reel);
+                setEditTitle(reel.title)
+                setEditDescription(reel.description)
+                setisEditing(false)
                 setReelsModal(true);
               }}
             >
@@ -268,6 +305,7 @@ const ProfilePage = () => {
             </button>
 
             <div className="flex flex-col gap-4 p-5">
+
               <video
                 className="w-full max-h-[45vh] rounded-lg object-cover"
                 src={selectedReel.videoUrl}
@@ -276,14 +314,55 @@ const ProfilePage = () => {
                 playsInline
               />
 
-              <div>
-                <h1 className="font-semibold text-xl text-white truncate">
-                  {selectedReel.title}
-                </h1>
-                <p className="text-gray-400 text-sm mt-1">
-                  {selectedReel.description}
-                </p>
+              <div className="flex justify-between items-start gap-3">
+
+                {/* LEFT SIDE */}
+                <div className="flex-1">
+                  {isEditing ? (
+                    <div>
+                      <input
+                        className="bg-gray-800 text-white px-3 py-2 rounded w-full"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                      />
+
+                      <textarea
+                        className="bg-gray-800 text-white px-3 py-2 rounded w-full mt-2"
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <h1 className="font-semibold text-xl text-white truncate">
+                        {selectedReel.title}
+                      </h1>
+
+                      <p className="text-gray-400 text-sm mt-1">
+                        {selectedReel.description}
+                      </p>
+                    </>
+                  )}
+                </div>
+
+                {/* RIGHT SIDE: EDIT BUTTON */}
+                {isEditing ? (
+                  <button
+                    onClick={handleSaveReelUpdates}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
+                  >
+                    Save
+                  </button>
+                ) : (
+                  <SquarePen
+                    className="cursor-pointer hover:text-gray-300"
+                    onClick={() => setisEditing(true)}
+                  />
+                )}
               </div>
+
+
+
 
               <div className="border-t border-gray-700 pt-3">
                 <h3 className="text-gray-300 text-sm">
