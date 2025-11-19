@@ -1,28 +1,49 @@
-import React, { useEffect, useRef } from 'react'
-import { incrementReelView } from '../api/reels.api'
+import React, { useEffect, useState, useRef } from 'react'
+import { incrementReelView, likeUnlikeReel } from '../api/reels.api'
 import { AiFillEye } from "react-icons/ai";
 import { FaHeart, FaRegCommentDots } from "react-icons/fa";
 import ImmersiveMode from '../components/ImmersiveMode';
 import { useImmersive } from '../components/ImmersiveMode'
 import { useReels } from '../context/ReelsContext';
 import { Volume2, VolumeX } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const HomePage = () => {
     const {
         reels,
+        setReels,
         isMuted,
         setIsMuted,
         markAsViewed,
         updateReelViews,
         scrollPosition,
-        setScrollPosition
+        setScrollPosition,
     } = useReels();
+
 
     const videoRefs = useRef([])
     const containerRef = useRef(null);
     const { isImmersive } = useImmersive();
+    const { user } = useAuth();
 
-    // ✅ Restore scroll position when returning to page
+    const handleLike = async (reel) => {
+        if (!user?._id) return;
+
+        try {
+            const res = await likeUnlikeReel(reel._id);
+
+            const updatedLikes = res.data.likes.map(id => id.toString()); 
+            const updatedReels = reels.map(r =>
+                r._id === reel._id ? { ...r, likes: updatedLikes } : r
+            );
+            setReels(updatedReels);
+        } catch (error) {
+            console.error("Error liking reel:", error);
+        }
+    };
+
+
+    //  Restore scroll position when returning to page
     useEffect(() => {
         if (containerRef.current && scrollPosition > 0) {
             containerRef.current.scrollTop = scrollPosition;
@@ -128,13 +149,29 @@ const HomePage = () => {
                         <div className={`flex justify-center py-2 transition-all duration-300 ${isImmersive ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                             <div className='absolute right-5 bottom-56'>
                                 <div className='flex flex-col gap-4'>
-                                    <div className="flex flex-col items-center justify-center gap-1">
+                                    {/* <div className="flex flex-col items-center justify-center gap-1">
                                         <div className="h-8 w-8 flex justify-center items-center">
                                             <FaHeart className="text-red-500 text-[25px] "
                                                 style={{ filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.8))' }}
                                             />
                                         </div>
                                         <p className="text-white font-bold text-xs">0</p>
+                                    </div> */}
+                                    <div
+                                        className="flex flex-col items-center justify-center gap-1 cursor-pointer"
+                                        onClick={() => handleLike(reel)}
+                                    >
+                                        <div className="h-8 w-8 flex justify-center items-center">
+                                            {reel.likes.includes(user?._id) ? (
+                                                <FaHeart className="text-red-500 text-[28px]" />
+                                            ) : (
+                                                <FaHeart className="text-white text-[28px]" />
+                                            )}
+                                        </div>
+
+                                        <p className="text-white font-bold text-xs">
+                                            {reel.likes.length}
+                                        </p>
                                     </div>
 
                                     <div className="flex flex-col items-center justify-center gap-1">
@@ -168,7 +205,7 @@ const HomePage = () => {
 
                         {/* Mute indicator */}
                         <div className="absolute top-5 right-2 text-white bg-black/50 px-3 py-1 rounded-full text-sm">
-                            {isMuted ? <VolumeX onClick={toggleMute}/> : <Volume2 onClick={toggleMute}/>}
+                            {isMuted ? <VolumeX onClick={toggleMute} /> : <Volume2 onClick={toggleMute} />}
                         </div>
                     </div>
                 ))

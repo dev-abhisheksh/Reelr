@@ -6,12 +6,12 @@ import {
   userProfile,
 } from "../api/user.api";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { LogOut, SquarePen, X } from "lucide-react";
+import { LogOut, SquarePen, Trash2, X } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { logout } from "../api/auth.api";
-import { updateReel } from "../api/reels.api";
+import { deleteReel, updateReel } from "../api/reels.api";
 
 const ProfilePage = () => {
   const [userDetails, setUserDetails] = useState(null);
@@ -33,6 +33,28 @@ const ProfilePage = () => {
   const [isEditing, setisEditing] = useState(false)
   const [editTitle, setEditTitle] = useState("")
   const [editDescription, setEditDescription] = useState("")
+
+
+  const handleReelDelete = async () => {
+    toast("Delete this reel?", {
+      action: {
+        label: "Delete",
+        onClick: async () => {
+          try {
+            await deleteReel(selectedReel._id);
+            toast.success("Reel deleted successfully");
+            setReels(prev => prev.filter(r => r._id !== selectedReel._id));
+          } catch (error) {
+            console.error("Error deleting reel:", error);
+            toast.error("Failed to delete reel");
+          }
+        }
+      },
+      cancel: {
+        label: "Cancel"
+      }
+    });
+  };
 
   const handleSaveReelUpdates = async () => {
     try {
@@ -186,7 +208,7 @@ const ProfilePage = () => {
           className="bg-gray-900 rounded-md p-2 flex justify-center items-center hover:bg-orange-500 transition-colors duration-300"
           onClick={handleLogout}
         >
-          <LogOut />
+          <LogOut className="text-orange-500"/>
         </div>
 
         <SquarePen
@@ -354,10 +376,16 @@ const ProfilePage = () => {
                     Save
                   </button>
                 ) : (
-                  <SquarePen
-                    className="cursor-pointer hover:text-gray-300"
-                    onClick={() => setisEditing(true)}
-                  />
+                  <div className="flex flex-col gap-3 justify-center items-center">
+                    <SquarePen size={25}
+                      className="cursor-pointer hover:text-gray-300"
+                      onClick={() => setisEditing(true)}
+                    />
+                    <Trash2 size={26}
+                      className="text-red-600"
+                      onClick={handleReelDelete}
+                    />
+                  </div>
                 )}
               </div>
 

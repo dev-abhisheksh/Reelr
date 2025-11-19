@@ -1,5 +1,6 @@
 import { Reel } from "../models/reels.model.js";
 import cloudinary from "../config/cloudinary.js";
+import mongoose from "mongoose";
 
 const uploadReel = async (req, res) => {
     try {
@@ -49,18 +50,12 @@ const uploadReel = async (req, res) => {
     }
 };
 
-
 const deleteReel = async (req, res) => {
     try {
         const { id } = req.params;
         const reel = await Reel.findById(id);
 
         if (!reel) return res.status(404).json({ message: "Reel not found" });
-
-        // Only the creator or admin can delete
-        if (reel.creator.toString() !== req.user._id.toString() && req.user.role !== "admin") {
-            return res.status(403).json({ message: "Not authorized to delete this reel" });
-        }
 
         // Extract public ID from video URL
         const publicId = reel.videoUrl
@@ -215,6 +210,71 @@ const incrementViews = async (req, res) => {
     }
 }
 
+const getTotalViewsOfCreator = async (req, res) => {
+    try {
+        const { creatorId } = req.params;
+        const result = await Reel.aggregate([  // ← Added 'await' here
+            {
+                $match: {
+                    creator: new mongoose.Types.ObjectId(creatorId)
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalViews: { $sum: "$views" }
+                }
+            }
+        ]);
+        const totalViews = result.length > 0 ? result[0].totalViews : 0;
+        res.status(200).json({ totalViews })
+    } catch (error) {
+        console.error("Error fetching total views:", error)
+        res.status(500).json({ message: "Server error" })
+    }
+}
+
+ const likeUnlikeReel = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const reelId = req.params.id;
+
+        const reel = await Reel.findById(reelId);
+        if (!reel) {
+            return res.status(404).json({ error: "Reel not found" });
+        }
+
+        let liked;
+
+        if (reel.likes.includes(userId)) {
+            // UNLIKE
+            reel.likes.pull(userId);
+            liked = false;
+        } else {
+            // LIKE
+            reel.likes.push(userId);
+            liked = true;
+        }
+
+        await reel.save();
+
+        // RETURN FULL REEL WITH POPULATED CREATOR (OPTIONAL)
+        const updatedReel = await Reel.findById(reelId)
+            .populate("creator", "username profilePic");
+
+        return res.status(200).json({
+            liked,
+            likes: updatedReel.likes,       // full array of user IDs
+            totalLikes: updatedReel.likes.length,
+            reel: updatedReel               // entire updated reel
+        });
+
+    } catch (error) {
+        console.error("Error liking/unliking reel:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
 export {
     uploadReel,
     deleteReel,
@@ -223,5 +283,7 @@ export {
     updateReel,
     getReelsByUser,
     getTrendingReels,
-    incrementViews
+    incrementViews,
+    getTotalViewsOfCreator,
+    likeUnlikeReel
 }

@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema(
         role: {
             type: String,
             enum: ["viewer", "creator", "admin"],
-            default: "viewer",
+            default: "creator",
         },
         bio: {
             type: String,
