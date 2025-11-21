@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema(
             required: true,
             lowercase: true,
             trim: true,
-            index: true,
         },
         fullName: {
             type: String,
@@ -45,7 +44,7 @@ const userSchema = new mongoose.Schema(
         },
         friends: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
+            ref: "User",
         }]
     },
     { timestamps: true }

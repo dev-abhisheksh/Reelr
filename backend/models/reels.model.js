@@ -6,7 +6,6 @@ const reelSchema = new mongoose.Schema({
         required: true,
         lowercase: true,
         trim: true,
-        index: true
     },
     description: {
         type: String,
@@ -23,7 +22,8 @@ const reelSchema = new mongoose.Schema({
     creator: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: true
+        required: true,
+        index: true
     },
     views: {
         type: Number,
@@ -57,18 +57,17 @@ const reelSchema = new mongoose.Schema({
             type: String,
             lowercase: true,
             trim: true,
-            index: true, // makes searching faster
+            index: true,
         }
     ],
     category: {
         type: String,
         lowercase: true,
         trim: true,
-        index: true,
     }
 
 }, { timestamps: true });
 
-reelSchema.index({ title: "text", description: "text" });
+reelSchema.index({createdAt: -1})
 
 export const Reel = mongoose.model("Reel", reelSchema);
