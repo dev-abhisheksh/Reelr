@@ -13,7 +13,8 @@ Reelr is a scalable **microservice-based social media platform** combining short
 
 ---
 
-![Reelr Banner](./assets/banner.png)
+<!-- ![Reelr Banner](./assets/banner.png) -->
+**🔗 Live Demo:** [https://reelr.vercel.app/](https://reelr.vercel.app/)
 
 ---
 
