@@ -20,211 +20,282 @@ Reelr is a scalable **microservice-based social media platform** combining short
 
 ## 🚀 Features
 
-- **Authentication System** – Full login, register, and logout functionality using JWT.  
-- **Role-Based Access Control (RBAC)** – Define roles like admin, viewer, etc.  
-- **Real-Time Chat** – 1:1 chat powered by Socket.IO microservice.  
-- **Reels CRUD** – Upload, view, edit, and delete reels with title, description, and hashtags.  
-- **Reel Feed** – Randomized immersive feed with like and view tracking.  
-- **Profile Page** – View user profile, reels, and analytics.  
-- **Cloud Storage** – Media uploads via Cloudinary integration.  
-- **Friends System** – Add, remove, or search users and chat with them.  
-- **Indexing Optimization** – Efficient MongoDB indexing for fast retrieval.  
-- **Scalable Architecture** – Decoupled services for reels, auth, and chat.  
+- **Authentication System** – Full login, register, and logout functionality using JWT
+- **Role-Based Access Control (RBAC)** – Define roles like admin, viewer, etc.
+- **Real-Time Chat** – 1:1 chat powered by Socket.IO microservice
+- **Reels CRUD** – Upload, view, edit, and delete reels with title, description, and hashtags
+- **Reel Feed** – Randomized immersive feed with like and view tracking
+- **Profile Page** – View user profile, reels, and analytics
+- **Cloud Storage** – Media uploads via Cloudinary integration
+- **Friends System** – Add, remove, or search users and chat with them
+- **Indexing Optimization** – Efficient MongoDB indexing for fast retrieval
+- **Scalable Architecture** – Decoupled services for reels, auth, and chat
 
-> ⚙️ *Upcoming Features:* Comments, rate limiting, notifications, and Redis-based caching.
+> ⚙️ *Upcoming Features:* Comments, rate limiting, notifications, and Redis-based caching
 
 ---
 
 ## 🧠 Tech Stack
 
-- **Runtime:** Node.js  
-- **Framework:** Express.js  
-- **Frontend:** React + Vite + TailwindCSS  
-- **Database:** MongoDB with Mongoose  
-- **Real-Time:** Socket.IO  
-- **Auth:** JWT + Role Middleware  
-- **File Uploads:** Multer + Cloudinary  
-- **Environment:** dotenv  
-- **Middleware:** cookie-parser, cors  
+- **Runtime:** Node.js
+- **Framework:** Express.js
+- **Frontend:** React + Vite + TailwindCSS
+- **Database:** MongoDB with Mongoose
+- **Real-Time:** Socket.IO
+- **Auth:** JWT + Role Middleware
+- **File Uploads:** Multer + Cloudinary
+- **Environment:** dotenv
+- **Middleware:** cookie-parser, cors
 
 ---
 
 ## 📁 Repository Structure
 
+```
 /reelr
 ├── /backend
-│ ├── /config
-│ │ ├── cloudinary.js
-│ │ ├── db.js
-│ │ └── multer.js
-│ ├── /controllers
-│ │ ├── auth.controller.js
-│ │ ├── reel.controller.js
-│ │ └── user.controller.js
-│ ├── /middlewares
-│ │ ├── auth.middleware.js
-│ │ └── role.middleware.js
-│ ├── /models
-│ │ ├── reels.model.js
-│ │ └── user.model.js
-│ ├── /routes
-│ │ ├── auth.routes.js
-│ │ ├── reel.routes.js
-│ │ └── user.routes.js
-│ ├── /utils
-│ ├── /tests
-│ ├── app.js
-│ └── server.js
+│   ├── /config
+│   │   ├── cloudinary.js
+│   │   ├── db.js
+│   │   └── multer.js
+│   ├── /controllers
+│   │   ├── auth.controller.js
+│   │   ├── reel.controller.js
+│   │   └── user.controller.js
+│   ├── /middlewares
+│   │   ├── auth.middleware.js
+│   │   └── role.middleware.js
+│   ├── /models
+│   │   ├── reel.model.js
+│   │   └── user.model.js
+│   ├── /routes
+│   │   ├── auth.routes.js
+│   │   ├── reel.routes.js
+│   │   └── user.routes.js
+│   ├── /utils
+│   ├── /tests
+│   ├── app.js
+│   ├── server.js
+│   ├── .env
+│   ├── .env.example
+│   ├── .gitignore
+│   └── package.json
 │
 ├── /frontend
-│ ├── /api
-│ ├── /assets
-│ ├── /components
-│ ├── /context
-│ ├── /pages
-│ ├── /routes
-│ ├── /sockets
-│ ├── App.jsx
-│ ├── main.jsx
-│ └── vite.config.js
+│   ├── /public
+│   ├── /src
+│   │   ├── /api
+│   │   ├── /assets
+│   │   ├── /components
+│   │   ├── /context
+│   │   ├── /pages
+│   │   ├── /routes
+│   │   ├── /sockets
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── index.css
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── .gitignore
+│   └── package.json
 │
-└── README.md
+├── README.md
+└── .gitignore
+```
 
 ---
 
 ## ⚙️ Environment Variables
 
-| Variable   | Description |
-|-----------|-------------|
-| `PORT` |                  Server port (default: 8000) |
-| `MONGODB_URL` |           MongoDB connection URI |
-| `ACCESS_TOKEN_SECRET` |   Access token key |
-| `REFRESH_TOKEN_SECRET` |  Refresh token key |
-| `REFRESH_TOKEN_EXPIRY` |  Expiry duration (e.g., 10d) |
-| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
-| `CLOUDINARY_API_KEY` |    Cloudinary API key |
-| `CLOUDINARY_SECRET` |     Cloudinary API secret |
-| `JWT_SECRET` |            JWT signing secret |
+| Variable                  | Description                        |
+|---------------------------|------------------------------------|
+| `PORT`                    | Server port (default: 8000)        |
+| `MONGODB_URL`             | MongoDB connection URI             |
+| `ACCESS_TOKEN_SECRET`     | Access token key                   |
+| `REFRESH_TOKEN_SECRET`    | Refresh token key                  |
+| `REFRESH_TOKEN_EXPIRY`    | Expiry duration (e.g., 10d)        |
+| `CLOUDINARY_CLOUD_NAME`   | Cloudinary cloud name              |
+| `CLOUDINARY_API_KEY`      | Cloudinary API key                 |
+| `CLOUDINARY_SECRET`       | Cloudinary API secret              |
+| `JWT_SECRET`              | JWT signing secret                 |
 
 ---
 
 ## 🧩 Quick Start
 
 ### Prerequisites
+
 - Node.js 16+
 - MongoDB (local or Atlas)
 - Cloudinary account
-- Vite for frontend dev
+- npm or yarn
 
 ### Installation
+
 ```bash
+# Clone the repository
 git clone https://github.com/dev-abhisheksh/reelr.git
-cd backend && npm install
-cd ../frontend && npm install
+cd reelr
 
-Setup environment
+# Install backend dependencies
+cd backend
+npm install
 
+# Install frontend dependencies
+cd ../frontend
+npm install
+```
+
+### Setup Environment
+
+```bash
+# Copy example env file
 cp backend/.env.example backend/.env
+```
 
+Update `.env` with your MongoDB, JWT, and Cloudinary keys.
 
-Update .env with MongoDB, JWT, and Cloudinary keys.
+### Development
 
-Development
-cd backend && npm run dev
-cd ../frontend && npm run dev
+```bash
+# Run backend (from backend directory)
+cd backend
+npm run dev
 
+# Run frontend (from frontend directory, in a new terminal)
+cd frontend
+npm run dev
+```
 
-Visit:
-👉 Reelr: https://reelr.vercel.app/
+**Visit:**
+- 🎬 Frontend: http://localhost:5173
+- 🔌 Backend: http://localhost:8000
+- 🌐 Live Demo: https://reelr.vercel.app/
 
-🧠 Architecture Overview
-Frontend
+---
 
-Built with React + Vite + TailwindCSS
+## 🧠 Architecture Overview
 
-Responsive interface for reels, profiles, and chats
+### Frontend
 
-Connects to backend API and Socket.IO chat microservice
+- Built with React + Vite + TailwindCSS
+- Responsive interface for reels, profiles, and chats
+- Connects to backend API and Socket.IO chat microservice
+- Shared authentication state via Context API
 
-Shared authentication state via Context API
+### Backend
 
-Backend
+- Built with Node.js + Express + MongoDB
+- Handles authentication, reels, user data, and chat microservice
+- Optimized with middleware, JWT, and indexing
+- Scalable design with shared auth across services
 
-Built with Node.js + Express + MongoDB
+---
 
-Handles authentication, reels, user data, and chat microservice
+## 📡 API Overview
 
-Optimized with middleware, JWT, and indexing
+### Auth Routes
 
-Scalable design with shared auth across services
+| Endpoint              | Method | Description            |
+|-----------------------|--------|------------------------|
+| `/api/auth/register`  | POST   | Register new user      |
+| `/api/auth/login`     | POST   | Login existing user    |
+| `/api/auth/logout`    | POST   | Logout current user    |
 
-📡 API Overview
-Auth Routes
-Endpoint	        Method	Description
-/api/auth/register	POST	Register new user
-/api/auth/login	    POST	Login existing user
-/api/auth/logout    POST	Logout current user
-Reels               Routes
-Endpoint	        Method	Description
-/api/reels	        GET	Get all reels (feed)
-/api/reels/:id	    GET	Get reel by ID
-/api/reels	        POST	Upload new reel
-/api/reels/:id	    DELETE	Delete reel
-/api/reels/like/:id	POST	Like/unlike a reel
-User                Routes
-Endpoint	        Method	Description
-/api/users	        GET	Get all users
-/api/users/:id	    GET	Get specific user
-/api/users/friends	POST	Add/remove friends
-🧪 Testing
+### Reels Routes
+
+| Endpoint              | Method | Description            |
+|-----------------------|--------|------------------------|
+| `/api/reels`          | GET    | Get all reels (feed)   |
+| `/api/reels/:id`      | GET    | Get reel by ID         |
+| `/api/reels`          | POST   | Upload new reel        |
+| `/api/reels/:id`      | DELETE | Delete reel            |
+| `/api/reels/like/:id` | POST   | Like/unlike a reel     |
+
+### User Routes
+
+| Endpoint              | Method | Description            |
+|-----------------------|--------|------------------------|
+| `/api/users`          | GET    | Get all users          |
+| `/api/users/:id`      | GET    | Get specific user      |
+| `/api/users/friends`  | POST   | Add/remove friends     |
+
+---
+
+## 🧪 Testing
 
 Use Jest / Supertest for backend testing.
 
+```bash
 npm run test
+```
 
-⚙️ Deployment
-Component	Platform	Notes
-Frontend	Vercel	Vite build
-Backend  	Render	Node service
-Database	MongoDB Atlas	Cloud-hosted
-Media       Storage	Cloudinary	For reel uploads
-Socket      Service	Render (microservice)	Handles chat events
-🧭 Versioning & Changelog
+---
 
-Follows Semantic Versioning (MAJOR.MINOR.PATCH)
-Example:
-1.2.0 → Added chat microservice integration
+## ⚙️ Deployment
 
-Maintain updates in CHANGELOG.md.
+| Component       | Platform         | Notes                  |
+|-----------------|------------------|------------------------|
+| Frontend        | Vercel           | Vite build             |
+| Backend         | Render           | Node service           |
+| Database        | MongoDB Atlas    | Cloud-hosted           |
+| Media Storage   | Cloudinary       | For reel uploads       |
+| Socket Service  | Render           | Handles chat events    |
 
-🤝 Contributing
+---
 
-Fork the repo
+## 🧭 Versioning & Changelog
 
-Create a branch
+- Follows [Semantic Versioning](https://semver.org/) (MAJOR.MINOR.PATCH)
+- Example: `1.2.0` → Added chat microservice integration
+- Maintain updates in `CHANGELOG.md`
 
-git checkout -b feat/new-feature
+---
 
+## 🤝 Contributing
 
-Commit changes
+1. Fork the repo
+2. Create a branch
+   ```bash
+   git checkout -b feat/new-feature
+   ```
+3. Commit changes
+   ```bash
+   git commit -m "feat: added new feature"
+   ```
+4. Push and open a PR
+   ```bash
+   git push origin feat/new-feature
+   ```
 
-git commit -m "feat: added new feature"
+---
 
+## 💙 Code of Conduct
 
-Push and open a PR
+- Be respectful and professional
+- No hate speech or spam
+- Credit contributors
+- Stay collaborative
 
-💙 Code of Conduct
+---
 
-Be respectful and professional
+## 📸 Screenshots
 
-No hate speech or spam
+_Coming soon..._
 
-Credit contributors
+---
 
-Stay collaborative
+## 📜 License
 
-📸 Screenshots
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
-📜 License
+---
 
-This project is licensed under the MIT License — see the LICENSE file for details.
+## 👨‍💻 Author
+
+**Abhishek Sharma**  
+[GitHub](https://github.com/dev-abhisheksh) • [Live Demo](https://reelr.vercel.app/)
+
+---
+
+⭐ **Star this repo** if you find it helpful!
