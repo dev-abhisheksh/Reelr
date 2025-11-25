@@ -13,7 +13,7 @@ Reelr is a scalable **microservice-based social media platform** combining short
 
 ---
 
-![Reelr Banner](/mnt/data/abcf0e81-95e3-4816-aed2-010220c8a2b9.png)
+<!-- ![Reelr Banner](./assets/banner.png) -->
 **🔗 Live Demo:** [https://reelr.vercel.app/](https://reelr.vercel.app/)
 
 ---
@@ -90,24 +90,21 @@ Reelr is a scalable **microservice-based social media platform** combining short
 │
 └── README.md
 
-yaml
-Copy code
-
 ---
 
 ## ⚙️ Environment Variables
 
 | Variable   | Description |
 |-----------|-------------|
-| `PORT` | Server port (default: 8000) |
-| `MONGODB_URL` | MongoDB connection URI |
-| `ACCESS_TOKEN_SECRET` | Access token key |
-| `REFRESH_TOKEN_SECRET` | Refresh token key |
-| `REFRESH_TOKEN_EXPIRY` | Expiry duration (e.g., 10d) |
+| `PORT` |                  Server port (default: 8000) |
+| `MONGODB_URL` |           MongoDB connection URI |
+| `ACCESS_TOKEN_SECRET` |   Access token key |
+| `REFRESH_TOKEN_SECRET` |  Refresh token key |
+| `REFRESH_TOKEN_EXPIRY` |  Expiry duration (e.g., 10d) |
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
-| `CLOUDINARY_API_KEY` | Cloudinary API key |
-| `CLOUDINARY_SECRET` | Cloudinary API secret |
-| `JWT_SECRET` | JWT signing secret |
+| `CLOUDINARY_API_KEY` |    Cloudinary API key |
+| `CLOUDINARY_SECRET` |     Cloudinary API secret |
+| `JWT_SECRET` |            JWT signing secret |
 
 ---
 
@@ -125,20 +122,24 @@ git clone https://github.com/dev-abhisheksh/reelr.git
 cd backend && npm install
 cd ../frontend && npm install
 
-# Setup environment
+Setup environment
+
 cp backend/.env.example backend/.env
+
+
 Update .env with MongoDB, JWT, and Cloudinary keys.
 
 Development
-bash
-Copy code
 cd backend && npm run dev
 cd ../frontend && npm run dev
+
+
 Visit:
 👉 Reelr: https://reelr.vercel.app/
 
 🧠 Architecture Overview
 Frontend
+
 Built with React + Vite + TailwindCSS
 
 Responsive interface for reels, profiles, and chats
@@ -148,6 +149,7 @@ Connects to backend API and Socket.IO chat microservice
 Shared authentication state via Context API
 
 Backend
+
 Built with Node.js + Express + MongoDB
 
 Handles authentication, reels, user data, and chat microservice
@@ -158,40 +160,37 @@ Scalable design with shared auth across services
 
 📡 API Overview
 Auth Routes
-Endpoint	Method	Description
+Endpoint	        Method	Description
 /api/auth/register	POST	Register new user
-/api/auth/login	POST	Login existing user
-/api/auth/logout	POST	Logout current user
-
-Reels Routes
-Endpoint	Method	Description
-/api/reels	GET	Get all reels (feed)
-/api/reels/:id	GET	Get reel by ID
-/api/reels	POST	Upload new reel
-/api/reels/:id	DELETE	Delete reel
+/api/auth/login	    POST	Login existing user
+/api/auth/logout    POST	Logout current user
+Reels               Routes
+Endpoint	        Method	Description
+/api/reels	        GET	Get all reels (feed)
+/api/reels/:id	    GET	Get reel by ID
+/api/reels	        POST	Upload new reel
+/api/reels/:id	    DELETE	Delete reel
 /api/reels/like/:id	POST	Like/unlike a reel
-
-User Routes
-Endpoint	Method	Description
-/api/users	GET	Get all users
-/api/users/:id	GET	Get specific user
+User                Routes
+Endpoint	        Method	Description
+/api/users	        GET	Get all users
+/api/users/:id	    GET	Get specific user
 /api/users/friends	POST	Add/remove friends
-
 🧪 Testing
+
 Use Jest / Supertest for backend testing.
 
-bash
-Copy code
 npm run test
+
 ⚙️ Deployment
 Component	Platform	Notes
 Frontend	Vercel	Vite build
-Backend	Render	Node service
+Backend  	Render	Node service
 Database	MongoDB Atlas	Cloud-hosted
-Media Storage	Cloudinary	For reel uploads
-Socket Service	Render (microservice)	Handles chat events
-
+Media       Storage	Cloudinary	For reel uploads
+Socket      Service	Render (microservice)	Handles chat events
 🧭 Versioning & Changelog
+
 Follows Semantic Versioning (MAJOR.MINOR.PATCH)
 Example:
 1.2.0 → Added chat microservice integration
@@ -199,21 +198,23 @@ Example:
 Maintain updates in CHANGELOG.md.
 
 🤝 Contributing
+
 Fork the repo
 
 Create a branch
 
-bash
-Copy code
 git checkout -b feat/new-feature
+
+
 Commit changes
 
-bash
-Copy code
 git commit -m "feat: added new feature"
+
+
 Push and open a PR
 
 💙 Code of Conduct
+
 Be respectful and professional
 
 No hate speech or spam
@@ -225,4 +226,5 @@ Stay collaborative
 📸 Screenshots
 
 📜 License
+
 This project is licensed under the MIT License — see the LICENSE file for details.
