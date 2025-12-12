@@ -1,6 +1,7 @@
 import { Reel } from "../models/reels.model.js";
 import cloudinary from "../config/cloudinary.js";
 import mongoose from "mongoose";
+import { client } from "../utils/redis-client.js";
 
 const uploadReel = async (req, res) => {
     try {
@@ -77,21 +78,41 @@ const deleteReel = async (req, res) => {
     }
 };
 
+
+// Controller
 const getAllReels = async (req, res) => {
     try {
-        const allReels = await Reel.find()
-            .populate("creator", "username profileImage")
-            .sort({ createdAt: -1 })
-        if (allReels <= 0) {
-            return res.status(404).json({ message: "No reels" })
+        const cacheReels = await client.get("reels");
+        if (cacheReels) {
+            console.log("✅ Served from Redis cache");
+            return res.status(200).json({
+                message: "All Reels fetched from cache successfully",
+                allReels: JSON.parse(cacheReels),
+            });
         }
 
-        return res.status(200).json({ message: "All Reels fetched successfully", allReels })
+        const allReels = await Reel.find()
+            .populate("creator", "username profileImage")
+            .sort({ createdAt: -1 });
+
+        if (allReels.length === 0)
+            return res.status(404).json({ message: "No reels" });
+
+        // ✅ ioredis syntax for TTL
+        await client.set("reels", JSON.stringify(allReels), "EX", 300);
+        console.log("🆕 Cached all reels in Redis (via ioredis)");
+
+        return res.status(200).json({
+            message: "All Reels fetched successfully",
+            allReels,
+        });
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({ message: "failed to fetch reels" })
+        console.error("Error fetching reels:", error);
+        return res.status(500).json({ message: "Failed to fetch reels" });
     }
-}
+};
+
+
 
 const getReelById = async (req, res) => {
     try {
@@ -234,7 +255,7 @@ const getTotalViewsOfCreator = async (req, res) => {
     }
 }
 
- const likeUnlikeReel = async (req, res) => {
+const likeUnlikeReel = async (req, res) => {
     try {
         const userId = req.user._id;
         const reelId = req.params.id;
