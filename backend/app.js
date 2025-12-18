@@ -7,11 +7,14 @@ import userRoutes from "./routes/user.routes.js"
 import reelRoutes from "./routes/reel.routes.js"
 
 const app = express();
+
+app.set("trust proxy", true);
+
 app.use(cookieParser());
 app.use(express.json())
 app.use(cors({
     origin: "https://reelr.vercel.app"  /*"http://localhost:5173"*/,
-    credentials: true  
+    credentials: true
 }));
 
 app.use("/auth", authRoutes)
