@@ -1,7 +1,22 @@
 import cloudinary from "../config/cloudinary.js";
 import { User } from "../models/user.model.js";
 import { Reel } from "../models/reels.model.js";
+import { client } from "../utils/redis-client.js";
 
+const deleteRedisCache = async (client, patterns) => {
+    const patternArr = Array.isArray(patterns) ? patterns : [patterns]
+    for (const pattern of patterns) {
+        let cursor = "0";
+        do {
+            const [next, keys] = await client.scan(cursor, "MATCH", pattern, "COUNT", 100);
+            if (keys.length > 0) {
+                await client.del(...keys)
+            }
+            cursor = next;
+        } while (cursor != "0")
+        console.log("Cache cleared")
+    }
+}
 
 const uploadUserImage = async (req, res) => {
     try {
@@ -81,6 +96,9 @@ const updateProfile = async (req, res) => {
             { new: true, runValidators: true }
         ).select("-password")
 
+        await client.del(`me:${req.user._id}`).catch((err) => console.error("Failed clearing profile cache", err))
+        await client.del(`reels:all`).catch((err) => console.error("Failed clearing cache", err))
+
         res.json({
             success: true,
             message: "Profile Updated successfull",
@@ -97,13 +115,22 @@ const updateProfile = async (req, res) => {
 
 const getMyProfile = async (req, res) => {
     try {
+
+        const cachekey = `me:${req.user._id}`
+        const cached = await client.get(cachekey)
+        if (cached) {
+            return res.status(200).json({
+                message: "From cache",
+                success: true,
+                user: JSON.parse(cached)
+            })
+        }
+
         const user = await User.findById(req.user._id)
             .select("-password -__v")
-            // .populate({
-            //     path: "watchHistory",
-            //     select: "title thumbnailUrl views likes",
-            // })
             .lean();
+
+        await client.set(cachekey, JSON.stringify(user), "EX", 300)
 
         res.status(200).json({
             success: true,
