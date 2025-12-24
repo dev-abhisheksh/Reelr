@@ -14,26 +14,29 @@ Reelr is a scalable **microservice-based social media platform** combining short
 ---
 
 <!-- ![Reelr Banner](./assets/banner.png) -->
-**🔗 Live Demo:** [https://reelr.vercel.app/](https://reelr.vercel.app/)
+**🔗 Live Demo:** https://reelr.vercel.app/
 
 ---
 
 ## 🚀 Features
 
-- **Authentication System** – Full login, register, and logout functionality using JWT
-- **Role-Based Access Control (RBAC)** – Define roles like admin, viewer, etc.
-- **Real-Time Chat** – 1:1 chat powered by Socket.IO microservice
-- **Reels CRUD** – Upload, view, edit, and delete reels with title, description, and hashtags
-- **Reel Feed** – Randomized immersive feed with like and view tracking
-- **Profile Page** – View user profile, reels, and analytics
-- **Cloud Storage** – Media uploads via Cloudinary integration
-- **Friends System** – Add, remove, or search users and chat with them
-- **Indexing Optimization** – Efficient MongoDB indexing for fast retrieval
-- **Scalable Architecture** – Decoupled services for reels, auth, and chat
+- **Authentication System** – Secure login, register, and logout using JWT  
+- **Role-Based Access Control (RBAC)** – Support for roles like admin and viewer  
+- **Real-Time Chat** – 1:1 chat powered by a Socket.IO microservice  
+- **Reels CRUD** – Upload, view, edit, and delete reels with title, description, and hashtags  
+- **Reel Feed** – Immersive feed with like and view tracking  
+- **Profile Page** – User profile with uploaded reels and basic analytics  
+- **Cloud Storage** – Media uploads handled via Cloudinary  
+- **Friends System** – Search users, add/remove friends, and chat  
+- **Caching Layer** – Redis-based caching for faster feed and profile responses  
+- **Rate Limiting** – Redis-backed rate limiting to prevent abuse  
+- **Indexing Optimization** – Optimized MongoDB indexes for efficient queries  
+- **Scalable Architecture** – Decoupled services for authentication, reels, and chat  
 
-> ⚙️ *Upcoming Features:* Comments, rate limiting, notifications, and Redis-based caching
+> ⚙️ *Upcoming Feature:* Comments system on reels
 
 ---
+
 
 ## 🧠 Tech Stack
 
