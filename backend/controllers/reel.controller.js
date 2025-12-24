@@ -59,7 +59,9 @@ const uploadReel = async (req, res) => {
         });
 
         await deleteRedisCache(client, [
-            `reels:all`
+            `reels:all
+            me:${req.user._id}
+            `
         ]).catch(err => console.error("Redis cache clear failed", err))
 
         return res.status(200).json({ message: "Reel uploaded successfully", reel });
