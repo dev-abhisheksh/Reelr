@@ -8,6 +8,9 @@
 ![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-38B2AC?logo=tailwindcss&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)
+![Rate Limiting](https://img.shields.io/badge/Rate%20Limiting-Implemented-success)
+
 
 Reelr is a scalable **microservice-based social media platform** combining short-form video reels with **real-time chat**, powered by shared authentication, modular architecture, and optimized backend performance.
 
