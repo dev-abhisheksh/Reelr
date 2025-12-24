@@ -3,6 +3,22 @@ import cloudinary from "../config/cloudinary.js";
 import mongoose from "mongoose";
 import { client } from "../utils/redis-client.js";
 
+const deleteRedisCache = async (client, patterns) => {
+    const patternArr = Array.isArray(patterns) ? patterns : [patterns]
+
+    for (const pattern of patterns) {
+        let cursor = "0";
+        do {
+            const [next, keys] = await client.scan(cursor, "MATCH", pattern, "COUNT", 100);
+            if (keys.length > 0) {
+                await client.del(...keys)
+            }
+            cursor = next;
+        } while (cursor != "0")
+        console.log("Cache cleared")
+    }
+}
+
 const uploadReel = async (req, res) => {
     try {
         if (!req.file) {
@@ -41,6 +57,10 @@ const uploadReel = async (req, res) => {
             creator: req.user._id,
             thumbnail: req.body.thumbnail || result.eager?.[0]?.secure_url || "",
         });
+
+        await deleteRedisCache(client, [
+            `reels:all`
+        ]).catch(err => console.error("Redis cache clear failed", err))
 
         return res.status(200).json({ message: "Reel uploaded successfully", reel });
     } catch (error) {
@@ -82,28 +102,32 @@ const deleteReel = async (req, res) => {
 // Controller
 const getAllReels = async (req, res) => {
     try {
-        const cacheReels = await client.get("reels");
-        if (cacheReels) {
-            console.log("✅ Served from Redis cache");
+        const cacheKey = `reels:all`
+        const cached = await client.get(cacheKey)
+        if (cached) {
             return res.status(200).json({
-                message: "All Reels fetched from cache successfully",
-                allReels: JSON.parse(cacheReels),
-            });
+                message: "All reels fetched successfully from cache",
+                allReels: JSON.parse(cached)
+            })
         }
 
         const allReels = await Reel.find()
             .populate("creator", "username profileImage")
             .sort({ createdAt: -1 });
 
-        if (allReels.length === 0)
-            return res.status(404).json({ message: "No reels" });
+        if (allReels.length === 0) {
+            return res.status(200).json({
+                message: "No reels available",
+                allReels: []
+            })
+        }
 
         // ✅ ioredis syntax for TTL
-        await client.set("reels", JSON.stringify(allReels), "EX", 300);
+        await client.set(cacheKey, JSON.stringify(allReels), "EX", 300);
         console.log("🆕 Cached all reels in Redis (via ioredis)");
 
         return res.status(200).json({
-            message: "All Reels fetched successfully",
+            message: "All Reels fetched successfully from server",
             allReels,
         });
     } catch (error) {
@@ -153,6 +177,10 @@ const updateReel = async (req, res) => {
         if (!updatedReel) {
             return res.status(404).json({ message: "Reel not found" });
         }
+
+        await deleteRedisCache(client, [
+            `reels:all`
+        ])
 
         console.log('Reel updated successfully');
         return res.status(200).json({
