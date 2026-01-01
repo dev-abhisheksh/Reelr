@@ -12,7 +12,7 @@
 ![Rate Limiting](https://img.shields.io/badge/Rate%20Limiting-Implemented-success)
 
 
-Reelr is a scalable **microservice-based social media platform** combining short-form video reels with **real-time chat**, powered by shared authentication, modular architecture, and optimized backend performance.
+Reelr is a backend-focused social media system built with Node.js and MongoDB, featuring JWT-based authentication with refresh token rotation, short-form video APIs, and a dedicated real-time chat microservice using Socket.IO. The system follows a modular service-oriented architecture and uses Redis for caching and rate limiting.
 
 ---
 
