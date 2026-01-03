@@ -7,7 +7,7 @@ const deleteRedisCache = async (client, patterns) => {
     const patternArr = Array.isArray(patterns) ? patterns : [patterns]
 
     for (const pattern of patterns) {
-        let cursor = "0";
+        let cursor = "0";   
         do {
             const [next, keys] = await client.scan(cursor, "MATCH", pattern, "COUNT", 100);
             if (keys.length > 0) {
