@@ -79,18 +79,6 @@ export const ReelsProvider = ({ children }) => {
   };
 
 
-  const likeUnlike = (reelId, userId) => {
-    setReels(prev =>
-      prev.map(r =>
-        r._id === reelId ? {
-          ...r,
-          likes: r.likes.includes(userId) ? r.likes.filter(id => id !== userId) : [...r.likes, userId]
-        } : r
-      )
-    )
-  }
-
-
   const value = {
     reels,
     setReels,
@@ -103,7 +91,6 @@ export const ReelsProvider = ({ children }) => {
     updateReelViews,
     isLoading,
     shuffleArray,
-    likeUnlike
   };
 
   return (

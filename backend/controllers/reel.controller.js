@@ -1,4 +1,5 @@
 import { Reel } from "../models/reels.model.js";
+import { Like } from "../models/likes.model.js";
 import cloudinary from "../config/cloudinary.js";
 import mongoose from "mongoose";
 import { client } from "../utils/redis-client.js";
@@ -7,7 +8,7 @@ const deleteRedisCache = async (client, patterns) => {
     const patternArr = Array.isArray(patterns) ? patterns : [patterns]
 
     for (const pattern of patterns) {
-        let cursor = "0";   
+        let cursor = "0";
         do {
             const [next, keys] = await client.scan(cursor, "MATCH", pattern, "COUNT", 100);
             if (keys.length > 0) {
@@ -59,9 +60,8 @@ const uploadReel = async (req, res) => {
         });
 
         await deleteRedisCache(client, [
-            `reels:all
-            me:${req.user._id}
-            `
+            "reels:all",
+            `me:${req.user._id}`
         ]).catch(err => console.error("Redis cache clear failed", err))
 
         return res.status(200).json({ message: "Reel uploaded successfully", reel });
@@ -105,31 +105,52 @@ const deleteReel = async (req, res) => {
 const getAllReels = async (req, res) => {
     try {
         const cacheKey = `reels:all`
+        let allReels;
+
+        // 1. Try Redis cache for reel data
         const cached = await client.get(cacheKey)
         if (cached) {
-            return res.status(200).json({
-                message: "All reels fetched successfully from cache",
-                allReels: JSON.parse(cached)
-            })
+            allReels = JSON.parse(cached);
+        } else {
+            allReels = await Reel.find()
+                .populate("creator", "username profileImage")
+                .sort({ createdAt: -1 })
+                .lean();
+
+            if (allReels.length > 0) {
+                await client.set(cacheKey, JSON.stringify(allReels), "EX", 300);
+            }
         }
 
-        const allReels = await Reel.find()
-            .populate("creator", "username profileImage")
-            .sort({ createdAt: -1 });
-
-        if (allReels.length === 0) {
+        if (!allReels || allReels.length === 0) {
             return res.status(200).json({
                 message: "No reels available",
                 allReels: []
             })
         }
 
-        // ✅ ioredis syntax for TTL
-        await client.set(cacheKey, JSON.stringify(allReels), "EX", 300);
-        console.log("🆕 Cached all reels in Redis (via ioredis)");
+        // 2. Compute per-user "liked" status in ONE batch query
+        const userId = req.user?._id;
+        if (userId) {
+            const reelIds = allReels.map(r => r._id);
+            const userLikes = await Like.find(
+                { userId, reelId: { $in: reelIds } },
+                { reelId: 1, _id: 0 }
+            ).lean();
+
+            const likedSet = new Set(userLikes.map(l => l.reelId.toString()));
+
+            allReels = allReels.map(reel => ({
+                ...reel,
+                liked: likedSet.has(reel._id.toString())
+            }));
+        } else {
+            // Unauthenticated — no likes
+            allReels = allReels.map(reel => ({ ...reel, liked: false }));
+        }
 
         return res.status(200).json({
-            message: "All Reels fetched successfully from server",
+            message: "All reels fetched successfully",
             allReels,
         });
     } catch (error) {
@@ -202,13 +223,28 @@ const getReelsByUser = async (req, res) => {
             return res.status(400).json({ message: "All fields are required" })
         }
 
-        const reels = await Reel.find({ creator: userId }).sort({ createdAt: -1 }).populate("creator", "username profileImage");
+        const reels = await Reel.find({ creator: userId })
+            .sort({ createdAt: -1 })
+            .populate("creator", "username profileImage")
+            .lean();
 
-        if (!reels || reels.length === 0) {
-            return res.status(404).json({ message: "Reels not found for this user" })
-        }
+        const userIdFromReq = req.user?._id;
 
-        return res.status(200).json({ reels })
+        const reelsWithLiked = await Promise.all(
+            reels.map(async (reel) => {
+                const liked = await Like.exists({
+                    reelId: reel._id,
+                    userId: userIdFromReq
+                });
+
+                return {
+                    ...reel,
+                    liked: !!liked
+                };
+            })
+        );
+
+        return res.status(200).json({ reels: reelsWithLiked });
     } catch (error) {
         return res.status(500).json({ message: "Failed to fetch user reels" })
     }
@@ -216,16 +252,15 @@ const getReelsByUser = async (req, res) => {
 
 const getTrendingReels = async (req, res) => {
     try {
-        // Fetch all reels and sort by (likes count + views)
+        // Fetch all reels and sort by (likesCount + views)
         const reels = await Reel.aggregate([
             {
                 $addFields: {
-                    likeCount: { $size: "$likes" }, // count number of likes
-                    totalEngagement: { $add: [{ $size: "$likes" }, "$views"] } // likes + views
+                    totalEngagement: { $add: ["$likesCount", "$views"] }
                 }
             },
-            { $sort: { totalEngagement: -1, createdAt: -1 } }, // highest first, tie-break by recency
-            { $limit: 20 } // limit to top 20 trending reels
+            { $sort: { totalEngagement: -1, createdAt: -1 } },
+            { $limit: 20 }
         ]);
 
         if (!reels || reels.length === 0) {
@@ -285,46 +320,7 @@ const getTotalViewsOfCreator = async (req, res) => {
     }
 }
 
-const likeUnlikeReel = async (req, res) => {
-    try {
-        const userId = req.user._id;
-        const reelId = req.params.id;
 
-        const reel = await Reel.findById(reelId);
-        if (!reel) {
-            return res.status(404).json({ error: "Reel not found" });
-        }
-
-        let liked;
-
-        if (reel.likes.includes(userId)) {
-            // UNLIKE
-            reel.likes.pull(userId);
-            liked = false;
-        } else {
-            // LIKE
-            reel.likes.push(userId);
-            liked = true;
-        }
-
-        await reel.save();
-
-        // RETURN FULL REEL WITH POPULATED CREATOR (OPTIONAL)
-        const updatedReel = await Reel.findById(reelId)
-            .populate("creator", "username profilePic");
-
-        return res.status(200).json({
-            liked,
-            likes: updatedReel.likes,       // full array of user IDs
-            totalLikes: updatedReel.likes.length,
-            reel: updatedReel               // entire updated reel
-        });
-
-    } catch (error) {
-        console.error("Error liking/unliking reel:", error);
-        res.status(500).json({ error: "Internal server error" });
-    }
-};
 
 export {
     uploadReel,
@@ -335,6 +331,5 @@ export {
     getReelsByUser,
     getTrendingReels,
     incrementViews,
-    getTotalViewsOfCreator,
-    likeUnlikeReel
+    getTotalViewsOfCreator
 }

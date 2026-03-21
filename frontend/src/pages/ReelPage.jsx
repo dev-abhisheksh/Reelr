@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { incrementReelView, likeUnlikeReel } from '../api/reels.api'
+import { incrementReelView } from '../api/reels.api'
 import { AiFillEye } from "react-icons/ai";
 import { FaHeart, FaRegCommentDots } from "react-icons/fa";
 import ImmersiveMode from '../components/ImmersiveMode';
@@ -7,6 +7,7 @@ import { useImmersive } from '../components/ImmersiveMode'
 import { useReels } from '../context/ReelsContext';
 import { Volume2, VolumeX } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { toggleLike } from '../api/like.api';
 
 const HomePage = () => {
     const {
@@ -20,7 +21,7 @@ const HomePage = () => {
         setScrollPosition,
     } = useReels();
 
-
+    // console.log("Reels in context:", reels); // Debugging line
     const videoRefs = useRef([])
     const containerRef = useRef(null);
     const { isImmersive } = useImmersive();
@@ -30,13 +31,20 @@ const HomePage = () => {
         if (!user?._id) return;
 
         try {
-            const res = await likeUnlikeReel(reel._id);
+            const res = await toggleLike(reel._id);
 
-            const updatedLikes = res.data.likes.map(id => id.toString()); 
             const updatedReels = reels.map(r =>
-                r._id === reel._id ? { ...r, likes: updatedLikes } : r
+                r._id === reel._id
+                    ? {
+                        ...r,
+                        liked: res.data.liked,
+                        likesCount: res.data.likesCount
+                    }
+                    : r
             );
+
             setReels(updatedReels);
+
         } catch (error) {
             console.error("Error liking reel:", error);
         }
@@ -162,7 +170,7 @@ const HomePage = () => {
                                         onClick={() => handleLike(reel)}
                                     >
                                         <div className="h-8 w-8 flex justify-center items-center">
-                                            {reel.likes.includes(user?._id) ? (
+                                            {reel.liked ? (
                                                 <FaHeart className="text-red-500 text-[28px]" />
                                             ) : (
                                                 <FaHeart className="text-white text-[28px]" />
@@ -170,7 +178,7 @@ const HomePage = () => {
                                         </div>
 
                                         <p className="text-white font-bold text-xs">
-                                            {reel.likes.length}
+                                            {reel.likesCount}
                                         </p>
                                     </div>
 

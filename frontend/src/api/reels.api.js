@@ -8,7 +8,4 @@ export const deleteReel = async (id) => API.delete(`/reel/delete/${id}`)
 export const updateReel = async (reelId, data) => {
     await API.patch(`/reel/update/${reelId}`, data);
 };
-
-export const likeUnlikeReel = async (reelId) => {
-    return await API.patch(`/reel/like-reel/${reelId}`)
-}
+

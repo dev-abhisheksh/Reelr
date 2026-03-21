@@ -3,7 +3,7 @@ import axios from "axios";
 const getToken = () => localStorage.getItem("accessToken");
 
 export const API = axios.create({
-    baseURL: "https://reelr.onrender.com",
+    baseURL: "http://localhost:8000",
 });
 // https://reelr.onrender.com
 // ✅ Attach Bearer token to all requests automatically

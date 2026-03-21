@@ -20,7 +20,7 @@ app.use(cors({
 
 app.use("/auth", authRoutes)
 app.use("/user", userRoutes)
-app.use("/reel/", reelRoutes)
-app.use("/like/", likeRoutes)
+app.use("/reel", reelRoutes)
+app.use("/like", likeRoutes)
 
 export { app }
