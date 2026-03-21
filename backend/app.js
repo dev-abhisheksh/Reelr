@@ -13,12 +13,12 @@ app.set("trust proxy", true);
 app.use(cookieParser());
 app.use(express.json())
 app.use(cors({
-    origin: "https://reelr.vercel.app"  /*"http://localhost:5173"*/,
+    origin: ["https://reelr.vercel.app","http://localhost:5173"],
     credentials: true
 }));
 
 app.use("/auth", authRoutes)
 app.use("/user", userRoutes)
-app.use("/api/reel/", reelRoutes)
+app.use("/reel/", reelRoutes)
 
 export { app }

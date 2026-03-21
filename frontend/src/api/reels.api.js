@@ -1,28 +1,14 @@
-import axios from "axios";
+import { API } from "./axiosInstance";
 
-const getToken = () => localStorage.getItem("accessToken")
-
-const API = axios.create({
-    baseURL: "https://reelr.onrender.com/api/reel"  /*"https://reelr.onrender.com/auth"*/
-})
-
-API.interceptors.request.use((config) => {
-    const token = getToken();
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-})
-
-export const uploadReel = (formData) => API.post("/upload", formData)
-export const getAllReels = () => API.get("/all")
-export const incrementReelView = (reelId) => API.patch(`/${reelId}/views`);
-export const getReelById = (userId) => API.get(`/all-reels/${userId}`);
-export const deleteReel = async (id) => API.delete(`/delete/${id}`)
+export const uploadReel = (formData) => API.post("/reel/upload", formData)
+export const getAllReels = () => API.get("/reel/all")
+export const incrementReelView = (reelId) => API.patch(`/reel/${reelId}/views`);
+export const getReelById = (userId) => API.get(`/reel/all-reels/${userId}`);
+export const deleteReel = async (id) => API.delete(`/reel/delete/${id}`)
 export const updateReel = async (reelId, data) => {
-    await API.patch(`/update/${reelId}`, data);
+    await API.patch(`/reel/update/${reelId}`, data);
 };
 
 export const likeUnlikeReel = async (reelId) => {
-    return await API.patch(`/like-reel/${reelId}`)
+    return await API.patch(`/reel/like-reel/${reelId}`)
 }

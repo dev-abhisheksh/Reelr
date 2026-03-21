@@ -1,11 +1,14 @@
 import mongoose from "mongoose";
+import dns from 'dns';
 
-const connectDB = async()=>{
+dns.setServers(['8.8.8.8', '8.8.4.4']);
+
+const connectDB = async () => {
     try {
         const res = await mongoose.connect(`${process.env.MONGODB_URL}`);
         console.log(`\n Mongo DataBase Connected! - Host ${res.connection.host}`)
     } catch (error) {
-        console.log("Mongo DataBase Failed to Connect!!!",error);
+        console.log("Mongo DataBase Failed to Connect!!!", error);
     }
 }
 

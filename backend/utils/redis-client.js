@@ -1,7 +1,7 @@
 import Redis from "ioredis";
 
 const client = new Redis(process.env.REDIS_URL, {
-    tls: {},
+    maxRetriesPerRequest: null,
 });
 
 export {
