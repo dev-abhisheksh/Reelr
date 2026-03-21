@@ -7,51 +7,39 @@ const reelSchema = new mongoose.Schema({
         lowercase: true,
         trim: true,
     },
+
     description: {
         type: String,
         lowercase: true,
         trim: true
     },
+
     videoUrl: {
         type: String,
         required: true
     },
+
     thumbnail: {
         type: String
     },
+
     creator: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
         index: true
     },
+
     views: {
         type: Number,
         default: 0
     },
-    // likes: [
-    //     {
-    //         type: mongoose.Schema.Types.ObjectId,
-    //         ref: "User",
-    //         default: []
-    //     }
-    // ],
-    // comments: [
-    //     {
-    //         user: {
-    //             type: mongoose.Schema.Types.ObjectId,
-    //             ref: "User"
-    //         },
-    //         text: {
-    //             type: String,
-    //             required: true
-    //         },
-    //         createdAt: {
-    //             type: Date,
-    //             default: Date.now
-    //         }
-    //     }
-    // ],
+
+    likesCount: {
+        type: Number,
+        default: 0
+    },
+
     tags: [
         {
             type: String,
@@ -68,6 +56,6 @@ const reelSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-reelSchema.index({createdAt: -1})
+reelSchema.index({ createdAt: -1 })
 
 export const Reel = mongoose.model("Reel", reelSchema);
