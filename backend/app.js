@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js"
 import userRoutes from "./routes/user.routes.js"
 import reelRoutes from "./routes/reel.routes.js"
+import likeRoutes from "./routes/like.route.js"
 
 const app = express();
 
@@ -20,5 +21,6 @@ app.use(cors({
 app.use("/auth", authRoutes)
 app.use("/user", userRoutes)
 app.use("/reel/", reelRoutes)
+app.use("/like/", likeRoutes)
 
 export { app }
