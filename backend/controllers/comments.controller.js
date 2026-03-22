@@ -65,4 +65,18 @@ const addComment = async (req, res) => {
     }
 };
 
-export { addComment };
+const getComments = async (req, res) => {
+    try {
+        const { reelId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(reelId)) {
+            return res.status(400).json({ message: "Invalid ReelId" });
+        }
+        const comments = await Comment.find({ reelId }).populate("userId", "username profileImage").sort({ createdAt: -1 });
+        return res.status(200).json({ comments })
+    } catch (error) {
+        console.error("Failed to fetch comments", error);
+        return res.status(500).json({ message: "Failed to fetch comments" });
+    }
+}
+
+export { addComment, getComments };
