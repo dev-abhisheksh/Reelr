@@ -79,4 +79,42 @@ const getComments = async (req, res) => {
     }
 }
 
-export { addComment, getComments };
+const pinComment = async (req, res) => {
+    try {
+        const { commentId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(commentId)) {
+            return res.status(400).json({ message: "Invalid CommentId" });
+        }
+
+        const comment = await Comment.findById(commentId)
+            .select("reelId isPinned");
+
+        if (!comment) {
+            return res.status(404).json({ message: "Comment not found" });
+        }
+
+        const reel = await Reel.findById(comment.reelId).select("userId");
+
+        if (reel.userId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Only reel owner can pin comments" });
+        }
+
+        const updatedComment = await Comment.findByIdAndUpdate(
+            commentId,
+            { $set: { isPinned: !comment.isPinned } },
+            { new: true }
+        );
+
+        return res.status(200).json({
+            message: "Comment pinned status updated",
+            comment: updatedComment
+        });
+
+    } catch (error) {
+        console.error("Failed to update comment pinned status", error);
+        return res.status(500).json({ message: "Failed to update comment pinned status" });
+    }
+}
+
+export { addComment, getComments, pinComment };
