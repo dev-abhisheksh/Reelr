@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
             trim: true,
         },
         profileImage: {
-            type: String, //cloudinary link
+            type: String,
         },
         coverImage: {
             type: String
@@ -42,19 +42,10 @@ const userSchema = new mongoose.Schema(
             trim: true,
             maxlength: 200,
         },
-        friends: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-        }]
+
     },
     { timestamps: true }
 );
-
-// userSchema.pre("save", async function (next) {
-//     if (!this.isModified("password")) return next();
-//     this.password = await bcrypt.hash(this.password, 10);
-//     next();
-// });
 
 userSchema.methods.isPasswordCorrect = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
