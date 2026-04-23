@@ -7,6 +7,7 @@ import userRoutes from "./routes/user.routes.js"
 import reelRoutes from "./routes/reel.routes.js"
 import likeRoutes from "./routes/like.route.js"
 import commentRoutes from "./routes/comment.route.js"
+import postRoutes from "./routes/post.route.js"
 
 const app = express();
 
@@ -24,5 +25,6 @@ app.use("/user", userRoutes)
 app.use("/reel", reelRoutes)
 app.use("/like", likeRoutes)
 app.use("/comment", commentRoutes)
+app.use("/post", postRoutes)
 
 export { app }
