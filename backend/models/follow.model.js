@@ -9,7 +9,14 @@ const followSchema = new mongoose.Schema({
     following: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
+    }, 
+
+    status: {
+        type: String,
+        enum:["pending", "accepted"],
+        default: "pending"
     }
+    
 }, { timestamps: true });
 
 followSchema.index({ follower: 1, following: 1 }, {unique: true})

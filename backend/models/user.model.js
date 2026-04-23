@@ -43,6 +43,11 @@ const userSchema = new mongoose.Schema(
             maxlength: 200,
         },
 
+        isPrivate: {
+            type: Boolean,
+            default: false,
+        }
+
     },
     { timestamps: true }
 );

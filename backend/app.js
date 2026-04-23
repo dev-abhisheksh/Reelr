@@ -8,6 +8,9 @@ import reelRoutes from "./routes/reel.routes.js"
 import likeRoutes from "./routes/like.route.js"
 import commentRoutes from "./routes/comment.route.js"
 import postRoutes from "./routes/post.route.js"
+import followRoutes from "./routes/follow.route.js"
+
+dotenv.config()
 
 const app = express();
 
@@ -26,5 +29,6 @@ app.use("/reel", reelRoutes)
 app.use("/like", likeRoutes)
 app.use("/comment", commentRoutes)
 app.use("/post", postRoutes)
+app.use("/follow", followRoutes)
 
 export { app }
