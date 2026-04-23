@@ -37,6 +37,26 @@ const followUser = async (req, res) => {
     }
 }
 
-export{
-    followUser
+const getFollowRequests = async (req, res) => {
+    try {
+        const followRequests = await Follow.find({
+            following: req.user._id,
+            status: "pending"
+        }).populate("follower", "username profilePicture")
+        .sort({createdAt: -1})
+
+        return res.status(200).json({
+            count: followRequests.length,
+            followRequests
+        })
+
+    } catch (error) {
+        console.error("Failed to fetch follow requests", error)
+        return res.status(500).json({ message: "Failed to fetch follow requests" })
+    }
+}
+
+export {
+    followUser,
+    getFollowRequests
 }
