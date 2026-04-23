@@ -37,6 +37,23 @@ const createPost = async (req, res) => {
     }
 }
 
+const getPostsByUser = async(req,res)=>{
+    try {
+        const userId = req.user._id;
+
+        const posts = await Post.find({userId})
+        return res.status(200).json({
+            message: "Fetched posts of user",
+            count: posts.length,
+            posts
+        })
+    } catch (error) {
+        console.error("Failed to fetch posts", error)
+        return res.status(500).json({message: "Failed to fetch psosts"})
+    }
+}
+
 export {
-    createPost
+    createPost,
+    getPostsByUser
 }
