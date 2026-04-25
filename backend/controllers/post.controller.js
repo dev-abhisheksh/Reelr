@@ -70,8 +70,9 @@ const getFeed = async (req, res) => {
         const posts = await Post.find({
             userId: { $in: followingIds },
             isDeleted: false
-        }).sort({ createdAt: -1 })
-        .limit(200)
+        }).populate("userId", "username profileImage")
+            .sort({ createdAt: -1 })
+            .limit(200)
 
         return res.status(200).json({
             count: posts.length,

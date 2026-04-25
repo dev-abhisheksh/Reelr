@@ -12,6 +12,7 @@ import ProtectedRoutes from "./routes/ProtectedRoutes";
 import { ReelsProvider } from "./context/ReelsContext";
 import RegisterPage from "./pages/RegisterPage";
 import { Toaster } from "sonner";
+import FeedPage from "./pages/FeedPage";
 
 
 
@@ -25,59 +26,69 @@ const App = () => {
 
 
       <ImmersiveProvider>
-      
-          <Routes>
 
-            <Route
-              path="/"
-              element={
-                <ProtectedRoutes>
-                  <ReelPage />
-                </ProtectedRoutes>
-              }
-            />
-            <Route
-              path="chat"
-              element={
-                <ProtectedRoutes>
-                  <HomePge />
-                </ProtectedRoutes>
-              }
-            />
-            <Route
-              path="/search"
-              element={
-                <ProtectedRoutes>
-                  <SearchPage />
-                </ProtectedRoutes>
-              }
-            />
+        <Routes>
 
+          <Route
+            path="/"
+            element={
+              <ProtectedRoutes>
+                <ReelPage />
+              </ProtectedRoutes>
+            }
+          />
 
+          <Route
+            path="/feed"
+            element={
+              <ProtectedRoutes>
+                <FeedPage />
+              </ProtectedRoutes>
+            }
+          />
 
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoutes>
-                  <ProfilePage />
-                </ProtectedRoutes>
-              }
-            />
-
+          <Route
+            path="chat"
+            element={
+              <ProtectedRoutes>
+                <HomePge />
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <ProtectedRoutes>
+                <SearchPage />
+              </ProtectedRoutes>
+            }
+          />
 
 
-            <Route
-              path="/upload"
-              element={
-                <ProtectedRoutes>
-                  <AddReel />
-                </ProtectedRoutes>
-              }
-            />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-          </Routes>
-       
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoutes>
+                <ProfilePage />
+              </ProtectedRoutes>
+            }
+          />
+
+
+
+          <Route
+            path="/upload"
+            element={
+              <ProtectedRoutes>
+                <AddReel />
+              </ProtectedRoutes>
+            }
+          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+        </Routes>
+
 
         {!hideBottomBar && (
           <div className="fixed bottom-0 w-full z-50">
@@ -85,9 +96,9 @@ const App = () => {
           </div>
         )}
       </ImmersiveProvider>
-      <Toaster richColors position="top-right"/>
+      <Toaster richColors position="top-right" />
     </ReelsProvider>
-    
+
   );
 };
 

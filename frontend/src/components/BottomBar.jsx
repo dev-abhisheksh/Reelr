@@ -10,9 +10,9 @@ const BottomBar = () => {
     const { isImmersive } = useImmersive();
 
     const links = [
+        { to: "/feed", icon: <FaSearch size={20} /> },
         { to: "/chat", icon: <MessageCircle size={25} /> },
         { to: "/upload", icon: <MdAddCircleOutline size={26} /> },
-        { to: "/search", icon: <FaSearch size={20} /> },
         { to: "/", icon: <MdSlowMotionVideo size={26} /> },
         { to: "/profile", icon: <FaRegUserCircle /> }
     ]
