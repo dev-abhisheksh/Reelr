@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose, { startSession } from "mongoose"
 import { Follow } from "../models/follow.model.js"
 import { User } from "../models/user.model.js"
 
@@ -109,8 +109,61 @@ const acceptFollowRequest = async (req, res) => {
     }
 }
 
+const unfollowUser = async (req, res) => {
+
+    const { unfollowUserId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(unfollowUserId)) {
+        return res.status(400).json({ message: "Invalid id" });
+    }
+
+    const session = await mongoose.startSession();
+
+    try {
+        session.startTransaction()
+
+        const follow = await Follow.findOne({
+            following: unfollowUserId,
+            status: "accepted",
+            follower: req.user._id
+        }).session(session)
+
+        if (!follow) {
+            await session.abortTransaction();
+            return res.status(404).json({ message: "Follow relationship not found" })
+        }
+
+        await Follow.findByIdAndDelete(follow._id, { session })
+
+        await User.findByIdAndUpdate(unfollowUser,
+            { $inc: { followersCount: -1 } },
+            { session }
+        )
+
+        await User.findByIdAndUpdate(req.user._id,
+            { $inc: { followingCount: -1 } },
+            { session }
+        )
+
+        await session.commitTransaction()
+
+        return res.status(200).json({
+            message: "Unfollowed Successfully!"
+        })
+
+    } catch (error) {
+        await session.abortTransaction();
+        console.error("Failed to unfollow", error)
+        return res.status(500).json({ message: "Failed to unfollow" })
+    } finally {
+        session.endSession();
+    }
+}
+
+
+
 export {
     followUser,
     getFollowRequests,
-    acceptFollowRequest
+    acceptFollowRequest,
+    unfollowUser
 }
