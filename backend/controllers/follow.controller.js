@@ -58,29 +58,54 @@ const getFollowRequests = async (req, res) => {
 }
 
 const acceptFollowRequest = async (req, res) => {
+
+    const { followRequestId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(followRequestId)) {
+        return res.status(400).json({ message: "Invalid id" });
+    }
+
+    const session = await mongoose.startSession();
+
+
     try {
-        const {followRequestId} = req.params;
-        if(!mongoose.Types.ObjectId.isValid(followRequestId)){
-            return res.status(400).json({message: "Invalid id"});
+        session.startTransaction()
+
+        const request = await Follow.findById(followRequestId).session(session)
+        if (!request) {
+            await session.abortTransaction()
+            return res.status(404).json({ message: "Request does not exists" });
         }
 
-        const request = await Follow.findById(followRequestId);
-        if(!request) return res.status(404).json({message: "Request does not exists"});
-
-        if(request.following.toString() !== req.user._id.toString()){
-            return res.status(409).json({message: "Not allowed"});
+        if (request.following.toString() !== req.user._id.toString()) {
+            await session.abortTransaction()
+            return res.status(403).json({ message: "Not allowed" });
         }
 
         request.status = "accepted";
-        await request.save();
+        await request.save({ session });
+
+        await User.findByIdAndUpdate(request.following,
+            { $inc: { followersCount: 1 } },
+            { session }
+        )
+
+        await User.findByIdAndUpdate(request.follower,
+            { $inc: { followingCount: 1 } },
+            { session }
+        )
+
+        await session.commitTransaction()
 
         return res.status(200).json({
-            message: "Request acceptes successfully",
+            message: "Request accepted successfully",
             request: request.status
         })
     } catch (error) {
-        console.error("Failed to accept request", error);
-        return res.status(500).json({message: "Failed to accept  request"});
+        await session.abortTransaction()
+        console.error("Failed to accept request", error)
+        return res.status(500).json({ message: "Failed to accept request" })
+    } finally {
+        session.endSession()
     }
 }
 
