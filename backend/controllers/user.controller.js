@@ -314,6 +314,23 @@ const checkFriendStatus = async (req, res) => {
         return res.status(500).json({ isFriend: false, error: error.message });
     }
 };
+const toggleAccountPrivacy = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        user.isPrivate = !user.isPrivate;
+        await user.save();
+
+        return res.status(200).json({
+            message: "Account privacy updated",
+            isPrivate: user.isPrivate
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
 
 
 export {
@@ -327,5 +344,6 @@ export {
     getAllFriends,
     allUsers,
     getUserProfile,
-    checkFriendStatus
+    checkFriendStatus,
+    toggleAccountPrivacy
 }

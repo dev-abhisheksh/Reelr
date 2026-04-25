@@ -1,3 +1,4 @@
+import mongoose from "mongoose"
 import { Follow } from "../models/follow.model.js"
 import { User } from "../models/user.model.js"
 
@@ -43,7 +44,7 @@ const getFollowRequests = async (req, res) => {
             following: req.user._id,
             status: "pending"
         }).populate("follower", "username profilePicture")
-        .sort({createdAt: -1})
+            .sort({ createdAt: -1 })
 
         return res.status(200).json({
             count: followRequests.length,
@@ -56,7 +57,35 @@ const getFollowRequests = async (req, res) => {
     }
 }
 
+const acceptFollowRequest = async (req, res) => {
+    try {
+        const {followRequestId} = req.params;
+        if(!mongoose.Types.ObjectId.isValid(followRequestId)){
+            return res.status(400).json({message: "Invalid id"});
+        }
+
+        const request = await Follow.findById(followRequestId);
+        if(!request) return res.status(404).json({message: "Request does not exists"});
+
+        if(request.following.toString() !== req.user._id.toString()){
+            return res.status(409).json({message: "Not allowed"});
+        }
+
+        request.status = "accepted";
+        await request.save();
+
+        return res.status(200).json({
+            message: "Request acceptes successfully",
+            request: request.status
+        })
+    } catch (error) {
+        console.error("Failed to accept request", error);
+        return res.status(500).json({message: "Failed to accept  request"});
+    }
+}
+
 export {
     followUser,
-    getFollowRequests
+    getFollowRequests,
+    acceptFollowRequest
 }
