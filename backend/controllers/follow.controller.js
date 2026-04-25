@@ -1,6 +1,7 @@
 import mongoose, { startSession } from "mongoose"
 import { Follow } from "../models/follow.model.js"
 import { User } from "../models/user.model.js"
+import { Post } from "../models/post.model.js"
 
 const followUser = async (req, res) => {
 
@@ -191,11 +192,14 @@ const userStats = async (req, res) => {
     try {
         const userId = req.user._id;
         const stats = await User.findById(userId)
-            .select("-__v -updatedAt -password -role")
+            .select("-__v -updatedAt -password -role -friends")
+
+            const totalPosts = await Post.countDocuments({userId, isDeleted: false})
 
         return res.status(200).json({
-            message: "Fetched user stats",
-            stats
+            message: "Fetched user stats",  
+            stats,
+            totalPosts
         })
 
     } catch (error) {
