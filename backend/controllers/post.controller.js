@@ -1,6 +1,6 @@
 import { Follow } from "../models/follow.model.js";
 import { Post } from "../models/post.model.js";
-import { uploadImage } from "../utils/uploadImage.js";
+import { uploadImage } from "../utils/uploadFunction.js";
 
 
 const createPost = async (req, res) => {

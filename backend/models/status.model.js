@@ -4,8 +4,9 @@ const statusSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: true
-    }, 
+        required: true,
+        index: true
+    },
 
     mediaUrl: {
         type: String
@@ -14,9 +15,20 @@ const statusSchema = new mongoose.Schema({
     statusType: {
         type: String,
         enum: ["image", "video", "text"],
+        required: true
     },
 
-    
-}, { timestamps: true })
+    text: {
+        type: String,
+        trim: true
+    },
 
-export const Status = mongoose.model("Status", statusSchema)
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        expires: 86400
+    }
+
+}, { timestamps: false });
+
+export const Status = mongoose.model("Status", statusSchema);
