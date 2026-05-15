@@ -1,5 +1,6 @@
 import { Follow } from "../models/follow.model.js";
 import { Post } from "../models/post.model.js";
+import { postNotificationQueue } from "../queues/postNotification.queue.js";
 import { uploadImage } from "../utils/uploadFunction.js";
 
 
@@ -22,10 +23,22 @@ const createPost = async (req, res) => {
             image
         })
 
-        await postQueue.add("new-post", {
-            postId: post._id,
-            userId
-        });
+        await postNotificationQueue.add(
+            "new-post",
+            {
+                postId: post._id,
+                userId
+            },
+            {
+                attempts: 3,
+                backoff: {
+                    type: "exponential",
+                    delay: 3000
+                },
+                removeOnComplete: 100,
+                removeOnFail: 50
+            }
+        )
 
         return res.status(201).json({
             message: "Post created successfully",
