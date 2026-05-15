@@ -22,6 +22,11 @@ const createPost = async (req, res) => {
             image
         })
 
+        await postQueue.add("new-post", {
+            postId: post._id,
+            userId
+        });
+
         return res.status(201).json({
             message: "Post created successfully",
             post: {
