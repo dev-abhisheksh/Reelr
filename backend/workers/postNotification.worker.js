@@ -2,8 +2,11 @@ import { Worker } from "bullmq";
 import { Follow } from "../models/follow.model.js";
 import { Notification } from "../models/notification.model.js";
 import { client } from "../utils/redis-client.js";
+import connectDB from "../config/db.js";
 
-new Worker("post-notification", async (job) => {
+connectDB()
+
+const worker = new Worker("post-notification", async (job) => {
     try {
         const { postId, userId } = job.data;
 
