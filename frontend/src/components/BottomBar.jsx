@@ -4,22 +4,36 @@ import { FaRegUserCircle, FaSearch } from "react-icons/fa";
 import { MdAddCircleOutline, MdSlowMotionVideo } from "react-icons/md";
 import { useImmersive } from './ImmersiveMode';
 import { NavLink } from 'react-router-dom';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Bell } from 'lucide-react';
+import { useNotification } from '../context/NotificationContext';
 
 const BottomBar = () => {
     const { isImmersive } = useImmersive();
+    const { unreadCount, markAllRead } = useNotification();
 
     const links = [
         { to: "/feed", icon: <FaSearch size={20} /> },
         { to: "/chat", icon: <MessageCircle size={25} /> },
         { to: "/upload", icon: <MdAddCircleOutline size={26} /> },
         { to: "/", icon: <MdSlowMotionVideo size={26} /> },
+        {
+            to: "/notifications",
+            icon: (
+                <div className="relative" onClick={markAllRead}>
+                    <Bell size={24} />
+                    {unreadCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                            {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                    )}
+                </div>
+            )
+        },
         { to: "/profile", icon: <FaRegUserCircle /> }
     ]
 
     return (
         <div>
-
             <div className='w-full h-15 bg-[#282828] flex justify-center items-center'>
                 <div className='backdrop:blur-md w-[95%] rounded-md flex justify-around items-center text-white text-2xl gap-4'>
                     {links.map((link, index) => (
@@ -27,8 +41,7 @@ const BottomBar = () => {
                             key={index}
                             to={link.to}
                             className={({ isActive }) =>
-                                `transition-all duration-200 ${isActive ? 'text-orange-500 scale-110' : 'text-white'
-                                }`
+                                `transition-all duration-200 ${isActive ? 'text-orange-500 scale-110' : 'text-white'}`
                             }
                         >
                             {link.icon}
@@ -36,7 +49,6 @@ const BottomBar = () => {
                     ))}
                 </div>
             </div>
-
         </div>
     )
 }

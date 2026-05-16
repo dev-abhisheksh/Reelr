@@ -1,5 +1,7 @@
+import React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import { toast } from "sonner";
 
 const NotificationContext = createContext();
 
@@ -14,29 +16,36 @@ export const NotificationProvider = ({ children }) => {
         const user = JSON.parse(localStorage.getItem("user"));
         if (!token || !user) return;
 
-        const socket = io("https://your-main-backend.onrender.com", {
+        const socket = io("http://localhost:8000", {
             auth: { token },
             transports: ["websocket"]
         });
 
         socket.on("connect", () => {
             console.log("Notification socket connected");
-            socket.emit("register", user._id); // map userId → socketId on server
+            socket.emit("register", user._id);
         });
 
-        // Listen for new notifications from worker
         socket.on("new-notification", (notification) => {
             setNotifications((prev) => [notification, ...prev]);
             setUnreadCount((prev) => prev + 1);
+
+            // 🔔 Show sonner toast
+            toast(`Someone posted a new reel!`, {
+                description: "Tap to view",
+                duration: 4000,
+                action: {
+                    label: "View",
+                    onClick: () => window.location.href = `/post/${notification.postId}`
+                }
+            });
         });
 
         socket.on("disconnect", () => {
             console.log("Notification socket disconnected");
         });
 
-        return () => {
-            socket.disconnect();
-        };
+        return () => socket.disconnect();
     }, []);
 
     const markAllRead = () => setUnreadCount(0);
