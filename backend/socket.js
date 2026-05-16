@@ -26,11 +26,19 @@ const initSocket = (server) => {
     subscriber.on("message", (channel, message) => {
         if (channel === "new-notification") {
             const notification = JSON.parse(message);
+
+            console.log("Notification received from Redis:", notification);
+            console.log("Online users:", [...onlineUser.entries()]); // see who's online
+            console.log("Looking for receiver:", notification.receiver.toString());
+
             const receiverSocketId = onlineUser.get(notification.receiver.toString());
+            console.log("Receiver socket ID:", receiverSocketId); // null = not online
 
             if (receiverSocketId) {
                 io.to(receiverSocketId).emit("new-notification", notification);
                 console.log(`Notification emitted to ${notification.receiver}`);
+            } else {
+                console.log("Receiver is not online, notification saved to DB only");
             }
         }
     });
