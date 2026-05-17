@@ -32,6 +32,6 @@ const notificatonSchema = new mongoose.Schema({
 
 }, { timestamps: true })
 
-notificatonSchema.index({ reciever: 1, createdAt: -1 })
+notificatonSchema.index({ receiver: 1, createdAt: -1 })
 
 export const Notification = mongoose.model("Notification", notificatonSchema)
