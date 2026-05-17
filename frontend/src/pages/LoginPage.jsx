@@ -16,10 +16,13 @@ const LoginPage = () => {
 
         try {
             const res = await loginUser({ email, password });
-            const { accessToken } = res.data;
+            const { accessToken, user } = res.data;
 
             // console.log("Access Token Stored:", accessToken);
             localStorage.setItem("accessToken", accessToken);
+            localStorage.setItem("user", JSON.stringify(user));
+            const storedUser = JSON.parse(localStorage.getItem("user"));
+            console.log("User from localStorage:", storedUser); // what does this print?
 
             toast.success("User Logged In successfully");
             navigate("/");

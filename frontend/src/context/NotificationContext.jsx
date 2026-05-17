@@ -23,7 +23,7 @@ export const NotificationProvider = ({ children }) => {
 
         socket.on("connect", () => {
             console.log("Notification socket connected");
-            socket.emit("register", user._id);
+            socket.emit("register", user._id || user.id);
         });
 
         socket.on("new-notification", (notification) => {
