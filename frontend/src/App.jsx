@@ -3,7 +3,7 @@ import { ImmersiveProvider } from "./components/ImmersiveMode";
 import BottomBar from "./components/BottomBar";
 import { Route, Routes, useLocation } from "react-router-dom";
 import HomePge from "./pages/HomePge";
-import AddReel from "./pages/AddReel";
+import UploadPage from "./pages/UploadPage";
 import ProfilePage from "./pages/ProfilePage";
 import SearchPage from "./pages/SearchPage";
 import LoginPage from "./pages/LoginPage";
@@ -81,7 +81,7 @@ const App = () => {
             path="/upload"
             element={
               <ProtectedRoutes>
-                <AddReel />
+                <UploadPage />
               </ProtectedRoutes>
             }
           />
