@@ -13,6 +13,7 @@ import { ReelsProvider } from "./context/ReelsContext";
 import RegisterPage from "./pages/RegisterPage";
 import { Toaster } from "sonner";
 import FeedPage from "./pages/FeedPage";
+import NotificationPage from "./pages/NotificationPage";
 
 
 
@@ -82,6 +83,14 @@ const App = () => {
             element={
               <ProtectedRoutes>
                 <UploadPage />
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoutes>
+                <NotificationPage />
               </ProtectedRoutes>
             }
           />
