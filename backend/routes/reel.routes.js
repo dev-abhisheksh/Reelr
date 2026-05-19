@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.post("/upload", verifyJWT, upload.single("video"), uploadReel)
 
-router.get("/all", optionalJWT, rateLimiter({ keyPrefix: "allReels", limit: 7, windowSec: 60 }), getAllReels)
+router.get("/all", optionalJWT, rateLimiter({ keyPrefix: "allReels", limit: 30, windowSec: 60 }), getAllReels)
 router.delete("/delete/:id", verifyJWT, deleteReel)
 router.get("/single-reel/:id", verifyJWT, getReelById)
 router.patch("/update/:id", verifyJWT, updateReel)

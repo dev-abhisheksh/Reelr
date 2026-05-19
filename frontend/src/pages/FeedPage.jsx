@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { fetchFeedPosts } from '../api/post.api'
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ImageOff } from 'lucide-react'
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ImageOff, Bell } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const FeedPage = () => {
     const [feedPosts, setFeedPosts] = useState([])
@@ -9,6 +10,7 @@ const FeedPage = () => {
     const [doubleTapId, setDoubleTapId] = useState(null)
     const [loading, setLoading] = useState(true)
     const [expandedCaptions, setExpandedCaptions] = useState(new Set())
+    const navigate = useNavigate()
 
     useEffect(() => {
         const fetchAllFeeds = async () => {
@@ -113,8 +115,8 @@ const FeedPage = () => {
                         Reelr
                     </h1>
                     <div className="flex items-center gap-5">
-                        <Heart size={24} className="text-white/80 hover:text-white cursor-pointer transition-colors" />
-                        <Send size={22} className="text-white/80 hover:text-white cursor-pointer transition-colors -rotate-12" />
+                        <Bell onClick={()=> navigate("/notifications")} size={24} className="text-white/80 hover:text-white cursor-pointer transition-colors" />
+                        <Send onClick={()=> navigate("/chat")} size={22} className="text-white/80 hover:text-white cursor-pointer transition-colors -rotate-12" />
                     </div>
                 </div>
             </div>
