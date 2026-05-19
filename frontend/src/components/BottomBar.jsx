@@ -1,19 +1,21 @@
 import React from 'react'
 import { HiHome } from "react-icons/hi2";
-import { FaRegUserCircle, FaSearch } from "react-icons/fa";
+import { FaHome, FaRegUserCircle, FaSearch } from "react-icons/fa";
 import { MdAddCircleOutline, MdSlowMotionVideo } from "react-icons/md";
 import { useImmersive } from './ImmersiveMode';
 import { NavLink } from 'react-router-dom';
 import { MessageCircle, Bell } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
+import { IoSearch } from "react-icons/io5";
 
 const BottomBar = () => {
     const { isImmersive } = useImmersive();
     const { unreadCount, markAllRead } = useNotification();
 
     const links = [
-        { to: "/feed", icon: <FaSearch size={20} /> },
+        { to: "/feed", icon: <FaHome size={25} /> },
         // { to: "/chat", icon: <MessageCircle size={25} /> },
+        {to: "/search", icon: <IoSearch size={25} />},
         { to: "/upload", icon: <MdAddCircleOutline size={26} /> },
         { to: "/", icon: <MdSlowMotionVideo size={26} /> },
         // {
