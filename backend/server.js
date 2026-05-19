@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import { Server } from "socket.io";
 import http from "http"
 import { initSocket } from "./socket.js";
+import "./workers/postNotification.worker.js";
 
 const server = http.createServer(app)
 initSocket(server)
