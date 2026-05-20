@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { SearchAPI } from '../api/search.api';
+import { useNavigate } from 'react-router-dom';
 
 const SearchSkeleton = () => {
   return (
@@ -29,6 +30,7 @@ const SearchPage = () => {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const clearInputField = () => {
     setSearch("");
@@ -128,6 +130,7 @@ const SearchPage = () => {
 
                   <div
                     key={user._id}
+                    onClick={()=> navigate(`/user/${user.username}`)}
                     className='flex items-center justify-between p-3 rounded-2xl hover:bg-[#161b22] transition cursor-pointer'
                   >
 
