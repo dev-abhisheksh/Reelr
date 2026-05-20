@@ -60,3 +60,5 @@ export const checkFriendStatus = async (userId) => {
 export const removeFriend = async (friendId) => {
     return API.delete(`/user/friends-remove/${friendId}`)
 }
+
+export const userProfilePage = (username) => API.get(`/user/${username}`)

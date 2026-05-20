@@ -59,14 +59,14 @@ const App = () => {
           />
 
           <Route
-            path="/userid"
+            path="/user/:username"
             element={
               <ProtectedRoutes>
                 <UserProfilePage />
               </ProtectedRoutes>
             }
           />
-  
+
           <Route
             path="/search"
             element={
