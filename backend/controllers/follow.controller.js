@@ -7,7 +7,7 @@ const followUser = async (req, res) => {
 
     const follower = req.user._id
     const { followUserId: following } = req.params
-    if (!following) return res.status(400).json({ message: "userID is required" })
+    if (!following) return res.status(400)  .json({ message: "userID is required" })
 
     if (follower.toString() === following) {
         return res.status(400).json({ message: "Cannot follow yourself" })
