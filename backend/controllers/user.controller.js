@@ -2,6 +2,8 @@ import cloudinary from "../config/cloudinary.js";
 import { User } from "../models/user.model.js";
 import { Reel } from "../models/reels.model.js";
 import { client } from "../utils/redis-client.js";
+import mongoose from "mongoose";
+import { Post } from "../models/post.model.js";
 
 const deleteRedisCache = async (client, patterns) => {
     const patternArr = Array.isArray(patterns) ? patterns : [patterns]
@@ -331,6 +333,37 @@ const toggleAccountPrivacy = async (req, res) => {
     }
 };
 
+const getUserProfilePage = async (req, res) => {
+    try {
+        const { username } = req.params;
+        if (!username) {
+            return res.status(400).json({ message: "Username is required" })
+        }
+
+        const user = await User.findOne({ username })
+            .select("-password -__v")
+            .lean();
+
+        if (!user) return res.status(404).json({ message: "User not found" })
+
+        const posts = await Post.find({ userId: user._id, isDeleted: false })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        res.status(200).json({
+            success: true,
+            user,
+            posts,
+            isPrivate: user.isPrivate
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error fetching user profile",
+            error: error.message,
+        });
+    }
+}
 
 
 export {
@@ -341,9 +374,10 @@ export {
     addFriend,
     removeFriend,
     searchUsers,
-    getAllFriends,
     allUsers,
     getUserProfile,
     checkFriendStatus,
-    toggleAccountPrivacy
+    toggleAccountPrivacy,
+    getUserProfilePage,
+    getAllFriends,
 }
