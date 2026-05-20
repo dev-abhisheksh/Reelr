@@ -14,6 +14,7 @@ import RegisterPage from "./pages/RegisterPage";
 import { Toaster } from "sonner";
 import FeedPage from "./pages/FeedPage";
 import NotificationPage from "./pages/NotificationPage";
+import UserProfilePage from "./pages/UserProfilePage";
 
 
 
@@ -56,6 +57,16 @@ const App = () => {
               </ProtectedRoutes>
             }
           />
+
+          <Route
+            path="/userid"
+            element={
+              <ProtectedRoutes>
+                <UserProfilePage />
+              </ProtectedRoutes>
+            }
+          />
+  
           <Route
             path="/search"
             element={
