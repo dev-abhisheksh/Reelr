@@ -3,69 +3,69 @@ import { Follow } from "../models/follow.model.js"
 import { User } from "../models/user.model.js"
 import { Post } from "../models/post.model.js"
 
-const followUser = async (req, res) => {
+    const followUser = async (req, res) => {
 
-    const follower = req.user._id
-    const { followUserId: following } = req.params
-    if (!following) return res.status(400)  .json({ message: "userID is required" })
+        const follower = req.user._id
+        const { followUserId: following } = req.params
+        if (!following) return res.status(400).json({ message: "userID is required" })
 
-    if (follower.toString() === following) {
-        return res.status(400).json({ message: "Cannot follow yourself" })
-    }
+        if (follower.toString() === following) {
+            return res.status(400).json({ message: "Cannot follow yourself" })
+        }
 
-    const session = await mongoose.startSession()
+        const session = await mongoose.startSession()
 
-    try {
+        try {
 
-        session.startTransaction()
+            session.startTransaction()
 
-        const user = await User.findById(following).session(session)
-        if (!user) {
+            const user = await User.findById(following , "isPrivate").session(session)
+            if (!user) {
+                await session.abortTransaction()
+                return res.status(404).json({ message: "user not found" })
+            }
+
+            const existing = await Follow.findOne({ following, follower }).session(session)
+            if (existing) {
+                await session.abortTransaction()
+                return res.status(400).json({ message: "Already requested/following" })
+            }
+
+            const status = user.isPrivate ? "pending" : "accepted"
+
+            const [follow] = await Follow.create([{
+                follower,
+                following,
+                status
+            }], { session })
+
+            if (status === "accepted") {
+                await User.findByIdAndUpdate(following,
+                    { $inc: { followersCount: 1 } },
+                    { session }
+                );
+                await User.findByIdAndUpdate(follower,
+                    { $inc: { followingCount: 1 } },
+                    { session }
+                );
+            }
+
+            await session.commitTransaction()
+
+            return res.status(201).json({
+                message: status === "pending"
+                    ? "Follow request sent"
+                    : "Followed successfully",
+                follow
+            });
+        } catch (error) {
             await session.abortTransaction()
-            return res.status(404).json({ message: "user not found" })
+            console.error("Failed to follow user", error)
+            return res.status(500).json({ message: "Failed to follow user" })
+        } finally {
+            await session.endSession()
         }
-
-        const existing = await Follow.findOne({ following, follower }).session(session)
-        if (existing) {
-            await session.abortTransaction()
-            return res.status(400).json({ message: "Already requested/following" })
-        }
-
-        const status = user.isPrivate ? "pending" : "accepted"
-
-        const [follow] = await Follow.create([{
-            follower,
-            following,
-            status
-        }], { session })
-
-        if (status === "accepted") {
-            await User.findByIdAndUpdate(following,
-                { $inc: { followersCount: 1 } },
-                { session }
-            );
-            await User.findByIdAndUpdate(follower,
-                { $inc: { followingCount: 1 } },
-                { session }
-            );
-        }
-
-        await session.commitTransaction()
-
-        return res.status(201).json({
-            message: status === "pending"
-                ? "Follow request sent"
-                : "Followed successfully",
-            follow
-        });
-    } catch (error) {
-        await session.abortTransaction()
-        console.error("Failed to follow user", error)
-        return res.status(500).json({ message: "Failed to follow user" })
-    } finally {
-        await session.endSession()
     }
-}
 
 const getFollowRequests = async (req, res) => {
     try {
@@ -131,6 +131,11 @@ const acceptFollowRequest = async (req, res) => {
         })
     } catch (error) {
         await session.abortTransaction()
+
+        if(error.code === 11000){
+            return res.status(400).json({ message: "Already following / requested" })
+        }
+
         console.error("Failed to accept request", error)
         return res.status(500).json({ message: "Failed to accept request" })
     } finally {
@@ -194,10 +199,10 @@ const userStats = async (req, res) => {
         const stats = await User.findById(userId)
             .select("-__v -updatedAt -password -role -friends")
 
-            const totalPosts = await Post.countDocuments({userId, isDeleted: false})
+        const totalPosts = await Post.countDocuments({ userId, isDeleted: false })
 
         return res.status(200).json({
-            message: "Fetched user stats",  
+            message: "Fetched user stats",
             stats,
             totalPosts
         })
@@ -208,10 +213,33 @@ const userStats = async (req, res) => {
     }
 }
 
+const isFollowing = async (req, res) => {
+    try {
+        const {userId} = req.params;
+        if(!mongoose.Types.ObjectId.isValid(userId)){
+            return res.status(400).json({message: "Invalid id"})
+        }
+
+        const isFollowing = await Follow.findOne({
+            follower: req.user._id,
+            following: userId,
+            status: "accepted"
+        })
+
+        return res.status(200).json({
+            isFollowing: !!isFollowing
+        })
+    } catch (error) {
+        console.error("Failed to check follow status", error)
+        return res.status(500).json({ message: "Failed to check follow status" })
+    }
+}
+
 export {
     followUser,
     getFollowRequests,
     acceptFollowRequest,
     unfollowUser,
-    userStats
+    userStats,
+    isFollowing
 }
