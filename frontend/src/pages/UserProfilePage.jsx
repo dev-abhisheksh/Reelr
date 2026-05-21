@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { userProfilePage } from '../api/user.api'
+import { followStatus, followUser } from '../api/follow.api'
 
 const tabs = ['Posts', 'Reels', 'Tagged']
 
@@ -20,13 +21,10 @@ const UserProfilePage = () => {
             setLoading(true)
             setError('')
             try {
-                console.log("Fetching username:", username)        // is this the right string?
                 const res = await userProfilePage(username)
-                console.log("API response:", res.data)             // what comes back?
                 setUser(res.data.user)
                 setPosts(res.data.posts || [])
             } catch (err) {
-                console.error("Full error:", err.response)         // what's the actual error?
                 setError(err.response?.data?.message || 'User not found')
             } finally {
                 setLoading(false)
@@ -35,6 +33,34 @@ const UserProfilePage = () => {
 
         if (username) fetchUserProfile()
     }, [username])
+
+    const handleFollowToggle = async () => {
+        try {
+            if (following) {
+                await unfollowUser(user._id)
+                setFollowing(false)
+            } else {
+                await followUser(user._id)
+                setFollowing(true)
+            }
+        } catch (error) {
+            console.error("Error updating follow status:", error)
+        }
+    }
+
+    //Following Status Check
+    useEffect(() => {
+        const checkFollowingStatus = async () => {
+            try {
+                const res = await followStatus(user._id)
+                setFollowing(res.data.isFollowing)
+            } catch (error) {
+                console.error("Error checking follow status:", error)
+            }
+        }
+        if (user) checkFollowingStatus()
+    }, [user])
+
 
     if (loading) return (
         <div className="w-full flex items-center justify-center py-20">
@@ -134,7 +160,7 @@ const UserProfilePage = () => {
             {/* Follow / Message Button Row */}
             <div className="flex gap-2">
                 <button
-                    onClick={() => setFollowing(!following)}
+                    onClick={() => FollowUser()}
                     className="text-sm flex-1 font-semibold px-4 py-[7px] rounded-lg cursor-pointer transition-colors"
                     style={{
                         background: following ? '#efefef' : '#0095f6',
