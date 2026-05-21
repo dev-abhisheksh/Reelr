@@ -168,7 +168,7 @@ const unfollowUser = async (req, res) => {
 
         await Follow.findByIdAndDelete(follow._id, { session })
 
-        await User.findByIdAndUpdate(unfollowUser,
+        await User.findByIdAndUpdate(unfollowUserId,
             { $inc: { followersCount: -1 } },
             { session }
         )
