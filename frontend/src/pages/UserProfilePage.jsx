@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { userProfilePage } from '../api/user.api'
-import { followStatus, followUser } from '../api/follow.api'
+import { followStatus, followUser, unfollowUser } from '../api/follow.api'
 
 const tabs = ['Posts', 'Reels', 'Tagged']
 
@@ -118,7 +118,7 @@ const UserProfilePage = () => {
                     {/* Username + Buttons */}
                     <div className="flex items-center gap-3 flex-wrap mb-4">
                         <span className="text-xl font-light">{user?.username}</span>
-                        <div className="flex gap-2">
+                        {/* <div className="flex gap-2">
                             {following && (
                                 <button className="text-sm font-semibold px-4 py-[7px] rounded-lg bg-[#efefef] border border-[#dbdbdb] cursor-pointer">
                                     Message
@@ -127,7 +127,7 @@ const UserProfilePage = () => {
                             <button className="text-sm font-semibold px-3 py-[7px] rounded-lg bg-[#efefef] border border-[#dbdbdb] cursor-pointer">
                                 ▾
                             </button>
-                        </div>
+                        </div> */}
                     </div>
 
                     {/* Stats */}
@@ -160,7 +160,7 @@ const UserProfilePage = () => {
             {/* Follow / Message Button Row */}
             <div className="flex gap-2">
                 <button
-                    onClick={() => FollowUser()}
+                    onClick={() => handleFollowToggle()}
                     className="text-sm flex-1 font-semibold px-4 py-[7px] rounded-lg cursor-pointer transition-colors"
                     style={{
                         background: following ? '#efefef' : '#0095f6',
@@ -198,7 +198,7 @@ const UserProfilePage = () => {
             </div>
 
             {/* Private account guard */}
-            {user?.isPrivate ? (
+            {user?.isPrivate && !following ? (
                 <div className="text-center py-16 border-t border-gray-200">
                     <div className="text-5xl mb-4">🔒</div>
                     <div className="font-semibold text-lg mb-1">This account is private</div>
