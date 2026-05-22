@@ -28,6 +28,30 @@ const followUser = async (req, res) => {
 
         const existing = await Follow.findOne({ following, follower }).session(session)
         if (existing) {
+            // If a pending request exists, treat a second click as cancel request
+            if (existing.status === "pending") {
+                await Follow.findByIdAndDelete(existing._id).session(session)
+                await session.commitTransaction()
+                return res.status(200).json({ message: "Follow request cancelled" })
+            }
+
+            // If already accepted, treat a second click as unfollow
+            if (existing.status === "accepted") {
+                await Follow.findByIdAndDelete(existing._id).session(session)
+
+                await User.findByIdAndUpdate(following,
+                    { $inc: { followersCount: -1 } },
+                    { session }
+                );
+                await User.findByIdAndUpdate(follower,
+                    { $inc: { followingCount: -1 } },
+                    { session }
+                );
+
+                await session.commitTransaction()
+                return res.status(200).json({ message: "Unfollowed successfully" })
+            }
+
             await session.abortTransaction()
             return res.status(400).json({ message: "Already requested/following" })
         }

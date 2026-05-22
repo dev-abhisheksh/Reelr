@@ -6,6 +6,7 @@ import { Server } from "socket.io";
 import http from "http"
 import { initSocket } from "./socket.js";
 import "./workers/postNotification.worker.js";
+import "./workers/followRequestNotification.worker.js"
 
 const server = http.createServer(app)
 initSocket(server)
