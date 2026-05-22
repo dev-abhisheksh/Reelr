@@ -43,18 +43,37 @@ export const NotificationProvider = ({ children }) => {
         });
 
         socket.on("new-notification", (notification) => {
+
             setNotifications((prev) => [notification, ...prev]);
             setUnreadCount((prev) => prev + 1);
 
-            // 🔔 Show sonner toast
-            toast(`Someone posted a new reel!`, {
-                description: "Tap to view",
-                duration: 4000,
-                action: {
-                    label: "View",
-                    onClick: () => window.location.href = `/post/${notification.postId}`
-                }
-            });
+            if (notification.type === "new-post") {
+
+                toast("Someone posted a new reel!", {
+                    description: "Tap to view",
+                    duration: 4000,
+                    action: {
+                        label: "View",
+                        onClick: () =>
+                            window.location.href = `/post/${notification.postId}`
+                    }
+                });
+
+            }
+
+            if (notification.type === "follow-request") {
+
+                toast("New follow request", {
+                    description: notification.message,
+                    duration: 4000,
+                    action: {
+                        label: "View",
+                        onClick: () =>
+                            window.location.href = `/notifications`
+                    }
+                });
+
+            }
         });
 
         socket.on("disconnect", () => {

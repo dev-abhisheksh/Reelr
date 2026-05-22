@@ -103,6 +103,16 @@ const UserProfilePage = () => {
 
             }
 
+            // Cancel pending request
+            else if (followStatusState === "pending") {
+
+                // calling followUser will cancel the pending request on the server
+                await followUser(user._id)
+
+                setFollowStatusState("none")
+
+            }
+
             // Follow
             else if (followStatusState === "none") {
 
