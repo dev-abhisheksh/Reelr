@@ -2,6 +2,7 @@ import mongoose, { startSession } from "mongoose"
 import { Follow } from "../models/follow.model.js"
 import { User } from "../models/user.model.js"
 import { Post } from "../models/post.model.js"
+import { followRequestNotificationQueue } from "../queues/followRequestNotification.queue.js"
 
 const followUser = async (req, res) => {
 
@@ -51,6 +52,16 @@ const followUser = async (req, res) => {
         }
 
         await session.commitTransaction()
+
+        if (status === "pending") {
+            await followRequestNotificationQueue.add(
+                "send-follow-request-notification",
+                {
+                    senderId: follower,
+                    recieverId: following
+                }
+            )
+        }
 
         return res.status(201).json({
             message: status === "pending"
