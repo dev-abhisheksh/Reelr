@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from "rea
 import { io } from "socket.io-client";
 import { toast } from "sonner";
 import { API } from "../api/axiosInstance";
+import { fetchNotifications } from "../api/notification.api";
 
 const NotificationContext = createContext();
 
@@ -12,24 +13,24 @@ export const NotificationProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
 
-    // Fetch saved notifications from DB (covers offline period)
-    const fetchNotifications = useCallback(async () => {
-        try {
-            const res = await API.get("/notification");
-            setNotifications(res.data.notifications);
-            setUnreadCount(res.data.unreadCount);
-        } catch (error) {
-            console.error("Failed to fetch notifications:", error);
+    useEffect(() => {
+        const fetchAllNotifications = async () => {
+            try {
+                const res = await fetchNotifications();
+                setNotifications(res.data.notifications);
+                setUnreadCount(res.data.unreadCount);
+                console.log(res.data)
+            } catch (error) {
+                console.error("Failed to fetch notifications:", error);
+            }
         }
-    }, []);
+        fetchAllNotifications()
+    }, [])
 
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
         const user = JSON.parse(localStorage.getItem("user"));
         if (!token || !user) return;
-
-        // 1. Fetch existing notifications from DB (catches anything missed while offline)
-        fetchNotifications();
 
         // 2. Connect socket for real-time notifications
         const socket = io("http://localhost:8000", {
@@ -64,7 +65,7 @@ export const NotificationProvider = ({ children }) => {
             if (notification.type === "follow-request") {
 
                 toast("New follow request", {
-                    description: notification.message,
+                    description: `${notification.sender.username} wants to follow you`,
                     duration: 4000,
                     action: {
                         label: "View",
@@ -81,7 +82,7 @@ export const NotificationProvider = ({ children }) => {
         });
 
         return () => socket.disconnect();
-    }, [fetchNotifications]);
+    }, []);
 
     const markAllRead = async () => {
         setUnreadCount(0);
