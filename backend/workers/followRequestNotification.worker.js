@@ -16,10 +16,12 @@ const worker = new Worker(
                 message: "sent you a follow request"
             });
 
-            // IMPORTANT
+            const populatedNotifications = await Notification.findById(notification._id)
+            .populate("sender", "username profileImage")
+
             await client.publish(
                 "new-notification",
-                JSON.stringify(notification)
+                JSON.stringify(populatedNotifications)
             );
 
             console.log("Follow Request Notification Created");

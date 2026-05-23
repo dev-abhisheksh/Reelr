@@ -1,9 +1,15 @@
 import { Notification } from "../models/notification.model.js";
+import { User } from "../models/user.model.js";
 
 // GET /notification — fetch all notifications for the logged-in user
 const getNotifications = async (req, res) => {
     try {
         const userId = req.user._id;
+
+        const userDetails = await User.findById(userId).select("username profileImage");
+        if (!userDetails) {
+            return res.status(404).json({ message: "User not found" });
+        } 
 
         const notifications = await Notification.find({ receiver: userId })
             .populate("sender", "username profileImage")
@@ -18,7 +24,8 @@ const getNotifications = async (req, res) => {
 
         return res.status(200).json({
             notifications,
-            unreadCount
+            unreadCount,
+            username: userDetails.username
         });
     } catch (error) {
         console.error("Failed to fetch notifications:", error);
