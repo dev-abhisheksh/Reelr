@@ -1,11 +1,25 @@
-import React, { useEffect } from 'react'
+import React, {useState, useEffect } from 'react'
 import { useNotification } from '../context/NotificationContext'
 import { Heart, MessageCircle, UserPlus, Film, Bell, BellOff, CheckCheck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { followRequests } from '../api/follow.api'
 
 const NotificationPage = () => {
     const { notifications, unreadCount, markAllRead, fetchNotifications } = useNotification()
     const navigate = useNavigate()
+    const [requests, setRequests] = useState([])
+
+    useEffect(()=>{
+        const fetchFollowRequests = async()=>{
+            try {
+                const res = await followRequests();
+                setRequests(res.data.followRequests)
+            } catch (error) {
+                console.error(error)
+            }
+        }
+        fetchFollowRequests()
+    },[])
 
     useEffect(() => {
         fetchNotifications()
@@ -84,9 +98,8 @@ const NotificationPage = () => {
                 }
             }}
         >
-            {/* Avatar with type badge */}
             <div className="relative shrink-0">
-                <div className={`w-11 h-11 rounded-full overflow-hidden ring-1 ${!notification.isRead ? 'ring-orange-500/50' : 'ring-neutral-700/50'}`}>
+                <div className={`w-11 h-11 rounded-full overflow-hidden ring-1 ${!notification.isRead ? 'white' : 'ring-neutral-700/50'}`}>
                     <img
                         src={notification.sender?.profileImage}
                         alt=""
@@ -96,7 +109,7 @@ const NotificationPage = () => {
                         }}
                     />
                 </div>
-                {/* Type icon badge */}
+                
                 <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center">
                     {getNotificationIcon(notification.type)}
                 </div>
