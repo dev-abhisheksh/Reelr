@@ -13,7 +13,7 @@ const getNotifications = async (req, res) => {
 
         const notifications = await Notification.find({ receiver: userId })
             .populate("sender", "username profileImage")
-            .populate("postId", "text image")
+            .populate("followRequest")
             .sort({ createdAt: -1 })
             .limit(50);
 

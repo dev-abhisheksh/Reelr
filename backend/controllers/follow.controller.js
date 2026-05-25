@@ -82,7 +82,8 @@ const followUser = async (req, res) => {
                 "send-follow-request-notification",
                 {
                     senderId: follower,
-                    recieverId: following
+                    recieverId: following,
+                    followRequestId: follow._id
                 }
             )
         }

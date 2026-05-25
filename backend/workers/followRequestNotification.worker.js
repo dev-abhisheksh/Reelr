@@ -7,13 +7,14 @@ const worker = new Worker(
     async (job) => {
         try {
 
-            const { senderId, recieverId } = job.data;
+            const { senderId, recieverId, followRequestId } = job.data;
 
             const notification = await Notification.create({
                 sender: senderId,
                 receiver: recieverId,
                 type: "follow-request",
-                message: "sent you a follow request"
+                message: "sent you a follow request",
+                followRequest: followRequestId
             });
 
             const populatedNotifications = await Notification.findById(notification._id)

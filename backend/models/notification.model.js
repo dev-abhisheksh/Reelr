@@ -6,6 +6,11 @@ const notificatonSchema = new mongoose.Schema({
         ref: "Post",
     },
 
+    followRequest: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Follow",
+    },
+
     type: {
         type: String,
         enum: ["post", "follow-request", "like", "comment"],
