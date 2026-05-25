@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const notificatonSchema = new mongoose.Schema({
     postId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,   
         ref: "Post",
     },
 
@@ -15,6 +15,10 @@ const notificatonSchema = new mongoose.Schema({
         type: String,
         enum: ["post", "follow-request", "like", "comment"],
         required: true
+    },
+
+    message: {
+        type: String,
     },
 
     sender: {
@@ -34,8 +38,22 @@ const notificatonSchema = new mongoose.Schema({
         default: false
     }
 
-}, { timestamps: true })
+}, { timestamps: true });
 
-notificatonSchema.index({ receiver: 1, createdAt: -1 })
+notificatonSchema.index({ receiver: 1, createdAt: -1 });
 
-export const Notification = mongoose.model("Notification", notificatonSchema)
+notificatonSchema.index(
+    {
+        sender: 1,
+        receiver: 1,
+        type: 1
+    },
+    {
+        unique: true,
+        partialFilterExpression: {
+            type: "follow-request"
+        }
+    }
+);
+
+export const Notification = mongoose.model("Notification", notificatonSchema);

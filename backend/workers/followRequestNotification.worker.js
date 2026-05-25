@@ -7,18 +7,30 @@ const worker = new Worker(
     async (job) => {
         try {
 
-            const { senderId, recieverId, followRequestId } = job.data;
+            const { senderId, receiverId, followRequestId } = job.data;
 
-            const notification = await Notification.create({
-                sender: senderId,
-                receiver: recieverId,
-                type: "follow-request",
-                message: "sent you a follow request",
-                followRequest: followRequestId
-            });
+            const notification = await Notification.findOneAndUpdate(
+                {
+                    sender: senderId,
+                    receiver: receiverId,
+                    type: "follow-request"
+                },
+                {
+                    sender: senderId,
+                    receiver: receiverId,
+                    type: "follow-request",
+                    message: "sent you a follow request",
+                    followRequest: followRequestId,
+                    isRead: false
+                },
+                {
+                    upsert: true,
+                    new: true
+                }
+            );
 
             const populatedNotifications = await Notification.findById(notification._id)
-            .populate("sender", "username profileImage")
+                .populate("sender", "username profileImage")
 
             await client.publish(
                 "new-notification",
