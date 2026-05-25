@@ -28,12 +28,16 @@ const NotificationPage = () => {
 
     }, [])
 
-    const accpetUserFollowRequest = async(id)=>{
+    const accpetUserFollowRequest = async (id) => {
         try {
-            const res = await acceptFollowRequest(id)
-            console.log(res)
+            await acceptFollowRequest(id)
+
+            setNotifications((prev) => prev.filter((notification) => notification.followRequest._id !== id))
+            // console.log(res)
+            console.log(notifications.followRequest)
+            console.log(id)
         } catch (error) {
-            console.error(error)   
+            console.error(error)
         }
     }
 
@@ -125,7 +129,7 @@ const NotificationPage = () => {
                                             <div className='flex items-center gap-2 mt-3'>
 
                                                 <button
-                                                onClick={()=> accpetUserFollowRequest(notification.followRequest._id)}
+                                                    onClick={() => accpetUserFollowRequest(notification.followRequest._id)}
                                                     className='flex items-center gap-1.5 bg-white text-black px-4 py-2 rounded-full text-sm font-medium active:scale-95 transition'
                                                 >
                                                     <Check size={16} />
