@@ -3,6 +3,7 @@ import { Follow } from "../models/follow.model.js"
 import { User } from "../models/user.model.js"
 import { Post } from "../models/post.model.js"
 import { followRequestNotificationQueue } from "../queues/followRequestNotification.queue.js"
+import { Notification } from "../models/notification.model.js"
 
 const followUser = async (req, res) => {
 
@@ -82,7 +83,7 @@ const followUser = async (req, res) => {
                 "send-follow-request-notification",
                 {
                     senderId: follower,
-                    recieverId: following,
+                    receiverId: following,
                     followRequestId: follow._id
                 }
             )
@@ -158,6 +159,12 @@ const acceptFollowRequest = async (req, res) => {
             { $inc: { followingCount: 1 } },
             { session }
         )
+
+        await Notification.deleteMany({
+            sender: request.follower,
+            receiver: request.following,
+            type: "follow-request"
+        },{ session })
 
         await session.commitTransaction()
 
