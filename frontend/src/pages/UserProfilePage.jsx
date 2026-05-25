@@ -58,6 +58,8 @@ const UserProfilePage = () => {
     // Check follow status
     useEffect(() => {
 
+        if (!user?._id) return;
+
         const checkFollowingStatus = async () => {
 
             try {
@@ -67,19 +69,19 @@ const UserProfilePage = () => {
                 setFollowStatusState(res.data.status)
 
             } catch (error) {
-
-                console.error(
-                    "Error checking follow status:",
-                    error
-                )
+                console.error(error)
             }
         }
 
-        if (user?._id) {
-            checkFollowingStatus()
-        }
+        checkFollowingStatus();
 
-    }, [user?._id])
+        const interval = setInterval(() => {
+            checkFollowingStatus();
+        }, 5000);
+
+        return () => clearInterval(interval);
+
+    }, [user?._id]);
 
     // Follow / Unfollow
     const handleFollowToggle = async () => {
@@ -271,8 +273,8 @@ const UserProfilePage = () => {
                         <button
                             onClick={handleFollowToggle}
                             className={`text-sm px-6 py-[9px] rounded-xl font-semibold transition-all duration-200 cursor-pointer ${followStatusState !== "none"
-                                    ? 'bg-zinc-900 border border-zinc-700 text-white hover:bg-zinc-800'
-                                    : 'bg-[#0095f6] hover:bg-[#1877f2] text-white'
+                                ? 'bg-zinc-900 border border-zinc-700 text-white hover:bg-zinc-800'
+                                : 'bg-[#0095f6] hover:bg-[#1877f2] text-white'
                                 }`}
                         >
 
