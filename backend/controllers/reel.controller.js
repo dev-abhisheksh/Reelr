@@ -31,21 +31,30 @@ const uploadReel = async (req, res) => {
                 {
                     resource_type: "video",
                     folder: "reelsFolder",
+                    transformation: [
+                        {quality: "auto", fetch_format: "mp4"},
+                        {width: 1080, height: 1920, crop: "limit"},
+                        {video_codec: "h264"},
+                        {bit_rate: "1500k"},
+                    ],
                     eager: [
                         {
-                            format: "mp4",
-                            quality: "auto"
+                            format: "jpg",
+                            transformation: [
+                                {width: 540, height: 960, crop: "fill", gravity: "center"},
+                                {start_offset: "2", quality: "auto"},
+                            ]
                         }
                     ],
                     eager_async: true,
                 },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
-                }
+                (error, result)=>{
+                    if(error) reject(error)
+                        else resolve(result);
+                },
             );
             stream.end(req.file.buffer);
-        });
+        })
 
         // creating in DB
         const { title, description, tags, category } = req.body;

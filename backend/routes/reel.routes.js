@@ -2,13 +2,13 @@ import express from "express"
 import verifyJWT from "../middlewares/auth.middleware.js";
 import optionalJWT from "../middlewares/optionalAuth.middleware.js";
 import allowRoles from "../middlewares/role.middleware.js";
-import { upload } from "../config/multer.js";
 import { deleteReel, getAllReels, getReelById, getReelsByUser, updateReel, uploadReel, getTrendingReels, incrementViews, getTotalViewsOfCreator } from "../controllers/reel.controller.js";
 import rateLimiter from "../middlewares/rateLimiter.js";
+import uploadReelMiddleware from "../middlewares/uploadReel.middleware.js"
 
 const router = express.Router();
 
-router.post("/upload", verifyJWT, upload.single("video"), uploadReel)
+router.post("/upload", verifyJWT, uploadReelMiddleware, uploadReel)
 
 router.get("/all", optionalJWT, rateLimiter({ keyPrefix: "allReels", limit: 30, windowSec: 60 }), getAllReels)
 router.delete("/delete/:id", verifyJWT, deleteReel)
