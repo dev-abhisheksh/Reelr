@@ -1,4 +1,4 @@
-# 🎬 Reelr — Real-time Social & Chat Platform
+# 🎬 Reelr — Full-fledge Real-time Social Media Platform
 
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 ![Node.js](https://img.shields.io/badge/Node.js-43853D?logo=node.js&logoColor=white)
@@ -9,10 +9,10 @@
 ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-38B2AC?logo=tailwindcss&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)
-![Rate Limiting](https://img.shields.io/badge/Rate%20Limiting-Implemented-success)
+![BullMQ](https://img.shields.io/badge/BullMQ-Implemented-orange)
 
 
-Reelr is a backend-focused social media system built with Node.js and MongoDB, featuring JWT-based authentication with refresh token rotation, short-form video APIs, and a dedicated real-time chat microservice using Socket.IO. The system follows a modular service-oriented architecture and uses Redis for caching and rate limiting.
+Reelr is a comprehensive real-time social media platform built with a focus on scalability and modern engineering practices. It features a robust backend powered by Node.js and MongoDB, utilizing BullMQ for background tasks and Redis for caching, rate limiting, and real-time event distribution. The application supports a wide range of social interactions including reels, image posts, stories, real-time notifications, and a sophisticated follow system.
 
 ---
 
@@ -23,35 +23,34 @@ Reelr is a backend-focused social media system built with Node.js and MongoDB, f
 
 ## 🚀 Features
 
-- **Authentication System** – Secure login, register, and logout using JWT  
-- **Role-Based Access Control (RBAC)** – Support for roles like admin and viewer  
-- **Real-Time Chat** – 1:1 chat powered by a Socket.IO microservice  
-- **Reels CRUD** – Upload, view, edit, and delete reels with title, description, and hashtags  
-- **Reel Feed** – Immersive feed with like and view tracking  
-- **Profile Page** – User profile with uploaded reels and basic analytics  
-- **Cloud Storage** – Media uploads handled via Cloudinary  
-- **Friends System** – Search users, add/remove friends, and chat  
-- **Caching Layer** – Redis-based caching for faster feed and profile responses  
-- **Rate Limiting** – Redis-backed rate limiting to prevent abuse  
-- **Indexing Optimization** – Optimized MongoDB indexes for efficient queries  
-- **Scalable Architecture** – Decoupled services for authentication, reels, and chat  
-
-> ⚙️ *Upcoming Feature:* Comments system on reels
+- **Authentication System** – Secure JWT-based auth with refresh token rotation and cookie-based storage.
+- **Social Posts & Reels** – Comprehensive support for both short-form videos (Reels) and image-based social posts.
+- **Real-Time Notifications** – Instant alerts for likes, comments, follows, and uploads, utilizing Redis Pub/Sub and Socket.IO.
+- **Advanced Follow System** – Sophisticated follow/unfollow logic with support for private profiles and follow request management.
+- **Interactions & Comments** – Threaded comment system with pinning capabilities and post/reel likes.
+- **Status (Stories)** – Temporary 24-hour status updates for users.
+- **Real-Time Chat** – 1:1 messaging microservice integrated with the main platform.
+- **Background Processing** – Scalable handling of heavy tasks like media uploads and notification broadcasting using BullMQ workers.
+- **Intelligent Feed** – Mixed feed algorithm for discovery of both reels and posts.
+- **Cloud Storage** – Media management handled via Cloudinary with optimized upload pipelines.
+- **Caching Layer** – Redis-based caching for high-performance feed and profile data retrieval.
+- **Rate Limiting** – Redis-backed protection against API abuse and brute-force attacks.
+- **Optimized Performance** – Strategic MongoDB indexing and modular service-oriented architecture.
 
 ---
-
 
 ## 🧠 Tech Stack
 
 - **Runtime:** Node.js
 - **Framework:** Express.js
-- **Frontend:** React + Vite + TailwindCSS
-- **Database:** MongoDB with Mongoose
-- **Real-Time:** Socket.IO
-- **Auth:** JWT + Role Middleware
+- **Frontend:** React + Vite + TailwindCSS 4.0
+- **Database:** MongoDB (Mongoose)
+- **Real-Time:** Socket.IO + Redis Pub/Sub
+- **Background Tasks:** BullMQ + Ioredis
+- **State Management:** TanStack Query (React Query)
+- **UI Components:** Lucide React, Hugeicons, Sonner (Toasts)
+- **Auth:** JWT + Role-Based Access Control (RBAC)
 - **File Uploads:** Multer + Cloudinary
-- **Environment:** dotenv
-- **Middleware:** cookie-parser, cors
 
 ---
 
@@ -60,49 +59,28 @@ Reelr is a backend-focused social media system built with Node.js and MongoDB, f
 ```
 /reelr
 ├── /backend
-│   ├── /config
-│   │   ├── cloudinary.js
-│   │   ├── db.js
-│   │   └── multer.js
-│   ├── /controllers
-│   │   ├── auth.controller.js
-│   │   ├── reel.controller.js
-│   │   └── user.controller.js
-│   ├── /middlewares
-│   │   ├── auth.middleware.js
-│   │   └── role.middleware.js
-│   ├── /models
-│   │   ├── reel.model.js
-│   │   └── user.model.js
-│   ├── /routes
-│   │   ├── auth.routes.js
-│   │   ├── reel.routes.js
-│   │   └── user.routes.js
-│   ├── /utils
-│   ├── /tests
-│   ├── app.js
-│   ├── server.js
-│   ├── .env
-│   ├── .env.example
-│   ├── .gitignore
+│   ├── /config         # Cloudinary, DB, and Multer configs
+│   ├── /controllers    # Business logic for all modules
+│   ├── /middlewares    # Auth, Role, Rate-limiting, and Uploads
+│   ├── /models         # Mongoose schemas for Reels, Posts, Notifications, etc.
+│   ├── /queues         # BullMQ queue definitions
+│   ├── /routes         # API endpoint definitions
+│   ├── /utils          # Redis client and helper functions
+│   ├── /workers        # BullMQ background workers
+│   ├── app.js          # Express app setup
+│   ├── server.js       # HTTP server and Socket.IO initialization
+│   ├── socket.js       # Real-time event logic
 │   └── package.json
 │
 ├── /frontend
-│   ├── /public
 │   ├── /src
-│   │   ├── /api
-│   │   ├── /assets
-│   │   ├── /components
-│   │   ├── /context
-│   │   ├── /pages
-│   │   ├── /routes
-│   │   ├── /sockets
-│   │   ├── App.jsx
-│   │   ├── main.jsx
-│   │   └── index.css
-│   ├── index.html
+│   │   ├── /api        # API service layers
+│   │   ├── /components # Reusable UI components
+│   │   ├── /context    # React Contexts (Auth, Notification, Socket)
+│   │   ├── /pages      # Application views/pages
+│   │   ├── /sockets    # Socket event handlers
+│   │   └── main.jsx
 │   ├── vite.config.js
-│   ├── .gitignore
 │   └── package.json
 │
 ├── README.md
@@ -117,13 +95,13 @@ Reelr is a backend-focused social media system built with Node.js and MongoDB, f
 |---------------------------|------------------------------------|
 | `PORT`                    | Server port (default: 8000)        |
 | `MONGODB_URL`             | MongoDB connection URI             |
+| `REDIS_URL`               | Redis connection string            |
 | `ACCESS_TOKEN_SECRET`     | Access token key                   |
 | `REFRESH_TOKEN_SECRET`    | Refresh token key                  |
 | `REFRESH_TOKEN_EXPIRY`    | Expiry duration (e.g., 10d)        |
 | `CLOUDINARY_CLOUD_NAME`   | Cloudinary cloud name              |
 | `CLOUDINARY_API_KEY`      | Cloudinary API key                 |
 | `CLOUDINARY_SECRET`       | Cloudinary API secret              |
-| `JWT_SECRET`              | JWT signing secret                 |
 
 ---
 
@@ -131,10 +109,9 @@ Reelr is a backend-focused social media system built with Node.js and MongoDB, f
 
 ### Prerequisites
 
-- Node.js 16+
-- MongoDB (local or Atlas)
+- Node.js 18+
+- MongoDB & Redis
 - Cloudinary account
-- npm or yarn
 
 ### Installation
 
@@ -143,151 +120,89 @@ Reelr is a backend-focused social media system built with Node.js and MongoDB, f
 git clone https://github.com/dev-abhisheksh/reelr.git
 cd reelr
 
-# Install backend dependencies
-cd backend
-npm install
-
-# Install frontend dependencies
-cd ../frontend
-npm install
+# Install dependencies
+cd backend && npm install
+cd ../frontend && npm install
 ```
-
-### Setup Environment
-
-```bash
-# Copy example env file
-cp backend/.env.example backend/.env
-```
-
-Update `.env` with your MongoDB, JWT, and Cloudinary keys.
 
 ### Development
 
 ```bash
 # Run backend (from backend directory)
-cd backend
 npm run dev
 
-# Run frontend (from frontend directory, in a new terminal)
-cd frontend
+# Run workers (in separate terminals)
+npm run worker      # Reel upload worker
+npm run notiWorker  # Notification worker
+
+# Run frontend (from frontend directory)
 npm run dev
 ```
-
-**Visit:**
-- 🎬 Frontend: http://localhost:5173
-- 🔌 Backend: http://localhost:8000
-- 🌐 Live Demo: https://reelr.vercel.app/
-
----
-
-## 🧠 Architecture Overview
-
-### Frontend
-
-- Built with React + Vite + TailwindCSS
-- Responsive interface for reels, profiles, and chats
-- Connects to backend API and Socket.IO chat microservice
-- Shared authentication state via Context API
-
-### Backend
-
-- Built with Node.js + Express + MongoDB
-- Handles authentication, reels, user data, and chat microservice
-- Optimized with middleware, JWT, and indexing
-- Scalable design with shared auth across services
 
 ---
 
 ## 📡 API Overview
 
-### Auth Routes
+### Auth & User
 
 | Endpoint              | Method | Description            |
 |-----------------------|--------|------------------------|
-| `/api/auth/register`  | POST   | Register new user      |
-| `/api/auth/login`     | POST   | Login existing user    |
-| `/api/auth/logout`    | POST   | Logout current user    |
+| `/auth/register`      | POST   | Register new user      |
+| `/auth/login`         | POST   | Login existing user    |
+| `/user/profile`       | GET    | Get current user data  |
 
-### Reels Routes
-
-| Endpoint              | Method | Description            |
-|-----------------------|--------|------------------------|
-| `/api/reels`          | GET    | Get all reels (feed)   |
-| `/api/reels/:id`      | GET    | Get reel by ID         |
-| `/api/reels`          | POST   | Upload new reel        |
-| `/api/reels/:id`      | DELETE | Delete reel            |
-| `/api/reels/like/:id` | POST   | Like/unlike a reel     |
-
-### User Routes
+### Social Content
 
 | Endpoint              | Method | Description            |
 |-----------------------|--------|------------------------|
-| `/api/users`          | GET    | Get all users          |
-| `/api/users/:id`      | GET    | Get specific user      |
-| `/api/users/friends`  | POST   | Add/remove friends     |
+| `/post/create`        | POST   | Upload new image post  |
+| `/post/feed`          | GET    | Get mixed social feed  |
+| `/reel/upload`        | POST   | Upload new reel        |
+| `/reel/all`           | GET    | Get reels discovery    |
+| `/comment/create/:id` | POST   | Add comment to content |
+
+### Notifications & Follows
+
+| Endpoint               | Method | Description             |
+|------------------------|--------|-------------------------|
+| `/notification`        | GET    | Fetch user notifications|
+| `/follow/:userId`      | POST   | Follow/Request follow   |
+| `/follow/requests`     | GET    | Manage follow requests  |
+| `/follow/stats`        | GET    | Get followers/following |
 
 ---
 
-## 🧪 Testing
+## 🧠 Architecture Overview
 
-Use Jest / Supertest for backend testing.
+### Real-Time & Scaling
+- **Redis Pub/Sub:** Used as a message broker to synchronize notification delivery across multiple server instances (if scaled horizontally).
+- **BullMQ:** Decouples heavy processing (like Cloudinary uploads and bulk notification triggers) from the request-response cycle, ensuring a snappy UI.
+- **Socket.IO:** Maintains persistent connections for instant UI updates.
 
-```bash
-npm run test
-```
+### Frontend Architecture
+- **React Query:** Handles server state, caching, and background synchronization.
+- **Context API:** Manages global application state for authentication and real-time connectivity.
 
 ---
 
 ## ⚙️ Deployment
 
-| Component       | Platform         | Notes                  |
-|-----------------|------------------|------------------------|
-| Frontend        | Vercel           | Vite build             |
-| Backend         | Render           | Node service           |
-| Database        | MongoDB Atlas    | Cloud-hosted           |
-| Media Storage   | Cloudinary       | For reel uploads       |
-| Socket Service  | Render           | Handles chat events    |
-
----
-
-## 🧭 Versioning & Changelog
-
-- Follows [Semantic Versioning](https://semver.org/) (MAJOR.MINOR.PATCH)
-- Example: `1.2.0` → Added chat microservice integration
-- Maintain updates in `CHANGELOG.md`
+| Component       | Platform         |
+|-----------------|------------------|
+| Frontend        | Vercel           |
+| Backend         | Render/Railway   |
+| Database        | MongoDB Atlas    |
+| Redis           | Upstash / Redis  |
+| Media Storage   | Cloudinary       |
 
 ---
 
 ## 🤝 Contributing
 
 1. Fork the repo
-2. Create a branch
-   ```bash
-   git checkout -b feat/new-feature
-   ```
+2. Create a branch (`feat/new-feature`)
 3. Commit changes
-   ```bash
-   git commit -m "feat: added new feature"
-   ```
 4. Push and open a PR
-   ```bash
-   git push origin feat/new-feature
-   ```
-
----
-
-## 💙 Code of Conduct
-
-- Be respectful and professional
-- No hate speech or spam
-- Credit contributors
-- Stay collaborative
-
----
-
-## 📸 Screenshots
-
-_Coming soon..._
 
 ---
 
