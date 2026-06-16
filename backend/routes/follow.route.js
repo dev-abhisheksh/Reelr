@@ -12,4 +12,4 @@ router.get("/is-following/:userId", verifyJWT, isFollowing)
 
 router.post("/:followUserId", verifyJWT, followUser)
 
-export default router
+export default router;
