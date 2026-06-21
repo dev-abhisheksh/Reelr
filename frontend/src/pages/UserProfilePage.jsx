@@ -6,6 +6,7 @@ import {
     followUser,
     unfollowUser
 } from '../api/follow.api'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 const tabs = ['Posts', 'Reels', 'Tagged']
 
@@ -17,43 +18,22 @@ const UserProfilePage = () => {
     // none | pending | accepted
     const [followStatusState, setFollowStatusState] = useState('none')
 
-    const [user, setUser] = useState(null)
-    const [posts, setPosts] = useState([])
-
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState('')
-
     const { username } = useParams()
+    const queryClient = useQueryClient();
 
-    // Fetch profile
-    useEffect(() => {
+    const {
+        data,
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: ["profile", username],
+        queryFn: () => userProfilePage(username),
+        enabled: !!username,
+        staleTime: 5 * 60 * 1000,
+    });
 
-        const fetchUserProfile = async () => {
-
-            setLoading(true)
-            setError('')
-
-            try {
-
-                const res = await userProfilePage(username)
-
-                setUser(res.data.user)
-                setPosts(res.data.posts || [])
-
-            } catch (err) {
-
-                setError(
-                    err.response?.data?.message || 'User not found'
-                )
-
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        if (username) fetchUserProfile()
-
-    }, [username])
+    const user = data?.data?.user;
+    const posts = data?.data?.posts || [];
 
     // Check follow status
     useEffect(() => {
@@ -95,13 +75,19 @@ const UserProfilePage = () => {
 
                 setFollowStatusState("none")
 
-                setUser(prev => ({
-                    ...prev,
-                    followersCount: Math.max(
-                        (prev.followersCount || 1) - 1,
-                        0
-                    )
-                }))
+                queryClient.setQueryData(["profile", username], (old) => {
+                    if (!old) return old;
+                    return {
+                        ...old,
+                        data: {
+                            ...old.data,
+                            user: {
+                                ...old.data.user,
+                                followersCount: Math.max((old.data.user.followersCount || 1) - 1, 0)
+                            }
+                        }
+                    }
+                });
 
             }
 
@@ -128,11 +114,19 @@ const UserProfilePage = () => {
 
                 if (newStatus === "accepted") {
 
-                    setUser(prev => ({
-                        ...prev,
-                        followersCount:
-                            (prev.followersCount || 0) + 1
-                    }))
+                    queryClient.setQueryData(["profile", username], (old) => {
+                        if (!old) return old;
+                        return {
+                            ...old,
+                            data: {
+                                ...old.data,
+                                user: {
+                                    ...old.data.user,
+                                    followersCount: (old.data.user.followersCount || 0) + 1
+                                }
+                            }
+                        }
+                    });
                 }
             }
 
@@ -146,7 +140,7 @@ const UserProfilePage = () => {
     }
 
     // Loading
-    if (loading) return (
+    if (isLoading) return (
         <div className="w-full min-h-screen flex items-center justify-center bg-black">
             <div className="flex flex-col items-center gap-4 text-zinc-400">
                 <div className="w-8 h-8 border-2 border-zinc-800 border-t-white rounded-full animate-spin" />
@@ -167,7 +161,7 @@ const UserProfilePage = () => {
             </div>
 
             <div className="text-sm text-zinc-400">
-                {error}
+                {error.response?.data?.message || error.message || 'User not found'}
             </div>
         </div>
     )
