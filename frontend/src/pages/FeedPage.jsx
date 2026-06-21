@@ -2,9 +2,10 @@ import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { fetchFeedPosts } from '../api/post.api'
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ImageOff, Bell } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 
 const FeedPage = () => {
-    const [feedPosts, setFeedPosts] = useState([])
+    // const [feedPosts, setFeedPosts] = useState([])
     const [likedPosts, setLikedPosts] = useState(new Set())
     const [savedPosts, setSavedPosts] = useState(new Set())
     const [doubleTapId, setDoubleTapId] = useState(null)
@@ -12,20 +13,32 @@ const FeedPage = () => {
     const [expandedCaptions, setExpandedCaptions] = useState(new Set())
     const navigate = useNavigate()
 
-    useEffect(() => {
-        const fetchAllFeeds = async () => {
-            try {
-                setLoading(true)
-                const res = await fetchFeedPosts()
-                setFeedPosts(res.data.posts)
-            } catch (error) {
-                console.error(error)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchAllFeeds()
-    }, [])
+    // useEffect(() => {
+    //     const fetchAllFeeds = async () => {
+    //         try {
+    //             setLoading(true)
+    //             const res = await fetchFeedPosts()
+    //             setFeedPosts(res.data.posts)
+    //         } catch (error) {
+    //             console.error(error)
+    //         } finally {
+    //             setLoading(false)
+    //         }
+    //     }
+    //     fetchAllFeeds()
+    // }, [])
+
+    const {
+        data,
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: ["feed"],
+        queryFn: fetchFeedPosts,
+        staleTime: 5 * 60 * 1000,
+    });
+
+    const feedPosts = data?.data?.posts || [];
 
     const toggleLike = (postId) => {
         setLikedPosts(prev => {
@@ -88,7 +101,7 @@ const FeedPage = () => {
         </div>
     )
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen bg-black">
                 <div className="fixed top-0 w-full z-30 bg-black/80 backdrop-blur-xl border-b border-white/[0.08]">
@@ -105,6 +118,10 @@ const FeedPage = () => {
         )
     }
 
+    if (error) {
+        return <div>Error loading feed</div>;
+    }
+
     return (
         <div className="min-h-screen bg-black pb-20">
 
@@ -115,8 +132,8 @@ const FeedPage = () => {
                         Reelr
                     </h1>
                     <div className="flex items-center gap-5">
-                        <Bell onClick={()=> navigate("/notifications")} size={24} className="text-white/80 hover:text-white cursor-pointer transition-colors" />
-                        <Send onClick={()=> navigate("/chat")} size={22} className="text-white/80 hover:text-white cursor-pointer transition-colors -rotate-12" />
+                        <Bell onClick={() => navigate("/notifications")} size={24} className="text-white/80 hover:text-white cursor-pointer transition-colors" />
+                        <Send onClick={() => navigate("/chat")} size={22} className="text-white/80 hover:text-white cursor-pointer transition-colors -rotate-12" />
                     </div>
                 </div>
             </div>
