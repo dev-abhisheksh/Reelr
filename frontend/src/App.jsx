@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { ImmersiveProvider } from "./components/ImmersiveMode";
 import BottomBar from "./components/BottomBar";
 import { Route, Routes, useLocation } from "react-router-dom";
-import HomePge from "./pages/HomePge";
+import ChatPage from "./pages/ChatPage";
 import UploadPage from "./pages/UploadPage";
 import ProfilePage from "./pages/ProfilePage";
 import SearchPage from "./pages/SearchPage";
 import LoginPage from "./pages/LoginPage";
-import ReelPage from "./pages/ReelPage";
+import ReelsFeed from "./pages/ReelsFeed";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import { ReelsProvider } from "./context/ReelsContext";
 import RegisterPage from "./pages/RegisterPage";
@@ -35,7 +35,7 @@ const App = () => {
             path="/"
             element={
               <ProtectedRoutes>
-                <ReelPage />
+                <ReelsFeed />
               </ProtectedRoutes>
             }
           />
@@ -53,7 +53,7 @@ const App = () => {
             path="chat"
             element={
               <ProtectedRoutes>
-                <HomePge />
+                <ChatPage />
               </ProtectedRoutes>
             }
           />

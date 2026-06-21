@@ -9,7 +9,7 @@ import { Volume2, VolumeX } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { toggleLike } from '../api/like.api';
 
-const HomePage = () => {
+const ReelsFeed = () => {
     const {
         reels,
         setReels,
@@ -224,4 +224,4 @@ const HomePage = () => {
     );
 };
 
-export default HomePage;
+export default ReelsFeed;
