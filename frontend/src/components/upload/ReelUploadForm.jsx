@@ -3,6 +3,7 @@ import { uploadReel } from "../../api/reels.api";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ReelUploadForm = () => {
   const [videoFile, setVideoFile] = useState(null);
@@ -20,6 +21,7 @@ const ReelUploadForm = () => {
   const videoInputRef = useRef(null);
   const thumbnailInputRef = useRef(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const clearError = () => setError("");
 
@@ -81,6 +83,7 @@ const ReelUploadForm = () => {
     try {
       await uploadReel(formData);
       toast.success("Reel uploaded successfully");
+      queryClient.invalidateQueries({ queryKey: ["myReels"] });
       navigate("/");
     } catch (err) {
       console.error("Reel upload failed:", err);
