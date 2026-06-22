@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   myReels,
   profileImagesUpload,
@@ -16,9 +17,7 @@ import EditProfileForm from "../components/profile/EditProfileForm";
 import ReelDetailModal from "../components/profile/ReelDetailModal";
 
 const ProfilePage = () => {
-  const [userDetails, setUserDetails] = useState(null);
-  const [userId, setUserId] = useState("");
-  const [reels, setReels] = useState([]);
+  const queryClient = useQueryClient();
 
   const [reelsModal, setReelsModal] = useState(false);
   const [selectedReel, setSelectedReel] = useState(null);
@@ -34,6 +33,33 @@ const ProfilePage = () => {
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
 
+  // Fetch profile via React Query
+  const { data: profileResponse, isLoading: isProfileLoading } = useQuery({
+    queryKey: ["myProfile"],
+    queryFn: userProfile,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+  });
+
+  // Fetch reels via React Query
+  const { data: reels = [] } = useQuery({
+    queryKey: ["myReels"],
+    queryFn: myReels,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+  });
+
+  const userDetails = profileResponse?.user;
+  const userId = profileResponse?.userId;
+
+  // Sync profile details for the edit form
+  useEffect(() => {
+    if (userDetails) {
+      setFullName(userDetails.fullName || "");
+      setBio(userDetails.bio || "");
+    }
+  }, [userDetails]);
+
   const handleReelDelete = async () => {
     toast("Delete this reel?", {
       action: {
@@ -42,7 +68,13 @@ const ProfilePage = () => {
           try {
             await deleteReel(selectedReel._id);
             toast.success("Reel deleted successfully");
-            setReels((prev) => prev.filter((r) => r._id !== selectedReel._id));
+
+            // Optimistically update the react query cache for reels
+            queryClient.setQueryData(["myReels"], (old) => {
+              if (!old) return [];
+              return old.filter((r) => r._id !== selectedReel._id);
+            });
+
             setReelsModal(false);
           } catch (error) {
             console.error("Error deleting reel:", error);
@@ -71,13 +103,16 @@ const ProfilePage = () => {
         description: editDescription,
       }));
 
-      setReels((prevReels) =>
-        prevReels.map((reel) =>
+      // Update the react query cache for reels
+      queryClient.setQueryData(["myReels"], (old) => {
+        if (!old) return [];
+        return old.map((reel) =>
           reel._id === selectedReel._id
             ? { ...reel, title: editTitle, description: editDescription }
             : reel
-        )
-      );
+        );
+      });
+
       toast.success("Reel updated successfully");
     } catch (err) {
       toast.error("Failed to update reel");
@@ -91,10 +126,17 @@ const ProfilePage = () => {
 
       const res = await profileImagesUpload(file, "profile");
 
-      setUserDetails((prev) => ({
-        ...prev,
-        profileImage: res.data.imageUrl,
-      }));
+      // Update the react query cache for profile
+      queryClient.setQueryData(["myProfile"], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          user: {
+            ...old.user,
+            profileImage: res.data.imageUrl,
+          },
+        };
+      });
 
       toast.success("Profile picture updated");
     } catch (err) {
@@ -109,10 +151,17 @@ const ProfilePage = () => {
 
       const res = await profileImagesUpload(file, "cover");
 
-      setUserDetails((prev) => ({
-        ...prev,
-        coverImage: res.data.imageUrl,
-      }));
+      // Update the react query cache for profile
+      queryClient.setQueryData(["myProfile"], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          user: {
+            ...old.user,
+            coverImage: res.data.imageUrl,
+          },
+        };
+      });
 
       toast.success("Cover image updated");
     } catch (err) {
@@ -126,52 +175,36 @@ const ProfilePage = () => {
 
       const res = await updateProfileData(fullName, bio);
 
-      setUserDetails(res.data.user);
-      toast.success("Profile updated");
+      // Update the react query cache for profile
+      queryClient.setQueryData(["myProfile"], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          user: res.data.user,
+        };
+      });
 
+      toast.success("Profile updated");
       setEditForm(false);
     } catch (err) {
       toast.error("Update failed");
     }
   };
 
-  const toggleEditForm = () => setEditForm(!editForm);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const { user, userId } = await userProfile();
-
-        setUserDetails(user);
-        setUserId(userId);
-
-        setFullName(user.fullName);
-        setBio(user.bio || "");
-      } catch (error) {
-        toast.error("Error loading profile");
-      }
-    };
-    fetchProfile();
-  }, []);
-
-  useEffect(() => {
-    const fetchUserReels = async () => {
-      try {
-        const reelsData = await myReels();
-        setReels(reelsData);
-      } catch (error) {
-        toast.error("Failed to load reels");
-      }
-    };
-
-    fetchUserReels();
-  }, []);
+  const toggleEditForm = () => {
+    if (!editForm && userDetails) {
+      setFullName(userDetails.fullName || "");
+      setBio(userDetails.bio || "");
+    }
+    setEditForm(!editForm);
+  };
 
   const handleLogout = async () => {
     try {
       await logout();
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
+      queryClient.clear(); // Clear cache on logout to prevent leaks
       toast.success("Logged out successfully");
       window.location.href = "/login";
     } catch (err) {
@@ -179,10 +212,15 @@ const ProfilePage = () => {
     }
   };
 
-  if (!userDetails) {
+  if (isProfileLoading || !userDetails) {
     return (
-      <div className="flex items-center justify-center h-screen bg-black text-white">
-        Loading profile...
+      <div className="w-full min-h-screen flex items-center justify-center bg-black">
+        <div className="flex flex-col items-center gap-4 text-zinc-400">
+          <div className="w-8 h-8 border-2 border-zinc-800 border-t-white rounded-full animate-spin" />
+          <span className="text-sm tracking-wide">
+            Loading profile...
+          </span>
+        </div>
       </div>
     );
   }
