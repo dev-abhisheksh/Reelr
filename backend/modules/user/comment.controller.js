@@ -6,30 +6,72 @@ import { Comment } from "../../models/comments.model.js";
 
 const commentOnReel = asyncHandler(async (req, res) => {
     const { reelId } = req.params;
-    let { comment } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(reelId)) throw new ApiError(400, "Invalid ReelId")
+    let { comment, parentComment } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(reelId)) throw new ApiError(400, "Invalid ReelId");
 
-    if (!comment || comment.trim().length === 0) throw new ApiError(400, "Comment cannot be empty")
-    comment = comment.trim()
+    if (!comment || comment.trim().length === 0) throw new ApiError(400, "Comment cannot be empty");
+    comment = comment.trim();
 
-    const reel = await Reel.findById(reelId)
-    if (!reel) throw new ApiError(404, "Reel not found")
+    const reel = await Reel.findById(reelId);
+    if (!reel) throw new ApiError(404, "Reel not found");
 
-    const newComment = await Comment.create({
-        reelId,
-        userId: req.user._id,
-        comment,
-        parentComment: parentComment || null
-    });
+    if (parentComment && !mongoose.Types.ObjectId.isValid(parentComment)) {
+        throw new ApiError(400, "Invalid parentComment ID");
+    }
 
-    res.status(201).json({
+    const session = await mongoose.startSession();
+    let populatedComment;
+
+    try {
+        await session.withTransaction(async () => {
+            const newComment = await Comment.create([{
+                reelId,
+                userId: req.user._id,
+                comment,
+                parentComment: parentComment || null
+            }], { session });
+
+            await Reel.findByIdAndUpdate(
+                reelId,
+                { $inc: { commentsCount: 1 } },
+                { session }
+            );
+
+            populatedComment = await Comment.findById(newComment[0]._id)
+                .populate("userId", "username profileImage")
+                .session(session);
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Comment added",
+            data: populatedComment
+        });
+    } catch (error) {
+        console.error("Failed to add comment:", error);
+        throw new ApiError(500, "Failed to add comment");
+    } finally {
+        session.endSession();
+    }
+});
+
+const getComments = asyncHandler(async (req, res) => {
+    const { reelId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(reelId)) {
+        throw new ApiError(400, "Invalid ReelId");
+    }
+
+    const comments = await Comment.find({ reelId, isDeleted: false })
+        .populate("userId", "username profileImage")
+        .sort({ createdAt: -1 });
+
+    res.status(200).json({
         success: true,
-        message: "Comment added",
-        data: newComment
+        comments
     });
+});
 
-})
-
-export{
-    commentOnReel
-}
+export {
+    commentOnReel,
+    getComments
+}

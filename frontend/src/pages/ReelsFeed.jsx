@@ -8,6 +8,7 @@ import { useReels } from '../context/ReelsContext';
 import { Volume2, VolumeX } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { toggleLike } from '../api/like.api';
+import CommentSection from '../components/comment/CommentSection';
 
 const ReelsFeed = () => {
     const {
@@ -26,6 +27,8 @@ const ReelsFeed = () => {
     const containerRef = useRef(null);
     const { isImmersive } = useImmersive();
     const { user } = useAuth();
+    const [isCommentOpen, setIsCommentOpen] = useState(false);
+    const [activeReelForComments, setActiveReelForComments] = useState(null);
 
     const handleLike = async (reel) => {
         if (!user?._id) return;
@@ -192,14 +195,20 @@ const ReelsFeed = () => {
                                         <p className="text-white font-bold text-xs">{reel.views ?? 0}</p>
                                     </div>
 
-                                    <div className="flex flex-col items-center justify-center gap-1">
-                                        <div className="h-8 w-8 flex justify-center items-center">
-                                            <FaRegCommentDots className="text-white text-[23px]"
-                                                style={{ filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.8))' }}
-                                            />
-                                        </div>
-                                        <p className="text-white font-bold text-xs">0</p>
-                                    </div>
+                                     <div 
+                                         className="flex flex-col items-center justify-center gap-1 cursor-pointer"
+                                         onClick={() => {
+                                             setActiveReelForComments(reel._id);
+                                             setIsCommentOpen(true);
+                                         }}
+                                     >
+                                         <div className="h-8 w-8 flex justify-center items-center">
+                                             <FaRegCommentDots className="text-white text-[23px]"
+                                                 style={{ filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.8))' }}
+                                             />
+                                         </div>
+                                         <p className="text-white font-bold text-xs">{reel.commentsCount ?? 0}</p>
+                                     </div>
                                 </div>
                             </div>
                         </div>
@@ -220,6 +229,21 @@ const ReelsFeed = () => {
             ) : (
                 <p className="text-white text-center mt-10">No reels found</p>
             )}
+
+            <CommentSection
+                reelId={activeReelForComments}
+                isOpen={isCommentOpen}
+                onClose={() => setIsCommentOpen(false)}
+                onCommentAdded={() => {
+                    setReels((prevReels) =>
+                        prevReels.map((r) =>
+                            r._id === activeReelForComments
+                                ? { ...r, commentsCount: (r.commentsCount || 0) + 1 }
+                                : r
+                        )
+                    );
+                }}
+            />
         </div>
     );
 };
