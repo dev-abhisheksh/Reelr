@@ -6,11 +6,12 @@ import authRoutes from "./routes/auth.routes.js"
 import userRoutes from "./routes/user.routes.js"
 import reelRoutes from "./routes/reel.routes.js"
 import likeRoutes from "./routes/like.route.js"
-import commentRoutes from "./routes/comment.route.js"
+// import commentRoutes from "./routes/comment.route.js"
 import postRoutes from "./routes/post.route.js"
 import followRoutes from "./routes/follow.route.js"
 import notificationRoutes from "./routes/notification.route.js"
 import searchRoutes from "./routes/search.route.js"
+import commentRoutes from "./modules/user/comment.route.js"
 
 dotenv.config()
 
@@ -34,5 +35,6 @@ app.use("/post", postRoutes)
 app.use("/follow", followRoutes)
 app.use("/notification", notificationRoutes)
 app.use("/search", searchRoutes)
+
     
 export { app }
