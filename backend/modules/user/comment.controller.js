@@ -19,7 +19,7 @@ const commentOnReel = asyncHandler(async (req, res) => {
         reelId,
         userId: req.user._id,
         comment,
-        parentComment: null
+        parentComment: parentComment || null
     });
 
     res.status(201).json({
