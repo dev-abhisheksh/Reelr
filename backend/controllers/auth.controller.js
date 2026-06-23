@@ -74,37 +74,63 @@ const loginUser = async (req, res) => {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ message: "All fields are mandatory" });
+            return res.status(400).json({
+                success: false,
+                message: "All fields are mandatory",
+            });
         }
 
-        // 1. Check user exists
         const user = await User.findOne({ email });
+
         if (!user) {
-            return res.status(404).json({ message: "Email not registered" });
+            return res.status(404).json({
+                success: false,
+                message: "Email not registered",
+            });
         }
 
-        // 2. Check password
-        const isMatchPassword = await bcrypt.compare(password, user.password);
+        const isMatchPassword = await bcrypt.compare(
+            password,
+            user.password
+        );
+
         if (!isMatchPassword) {
-            return res.status(401).json({ message: "Incorrect password" });
+            return res.status(401).json({
+                success: false,
+                message: "Incorrect password",
+            });
         }
 
-        // 3. Generate JWT tokens
         const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user);
 
-        res.json({
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+        };
+
+        res.cookie("accessToken", accessToken, cookieOptions);
+        res.cookie("refreshToken", refreshToken, cookieOptions);
+
+        return res.status(200).json({
             success: true,
+            message: "Login successful",
             user: {
                 id: user._id,
                 email: user.email,
+                username: user.username,
+                fullName: user.fullName,
+                role: user.role,
             },
-            accessToken,
-            refreshToken
-        })
+        });
     } catch (error) {
         console.error("Login error:", error);
-        return res.status(500).json({ message: "Failed to log in user" });
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to log in user",
+        });
     }
 };
 
