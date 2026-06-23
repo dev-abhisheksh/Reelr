@@ -22,16 +22,24 @@ const commentSchema = new mongoose.Schema({
     isPinned: {
         type: Boolean,
         default: false
-    }, 
+    },
 
     isDeleted: {
         type: Boolean,
         default: false
-    }
-    
+    },
+
+    parentComment: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+        default: null
+    },
+
+
+
 }, { timestamps: true })
 
-commentSchema.index({ reelId: 1 });
-commentSchema.index({ userId: 1 });
+commentSchema.index({ reelId: 1, createdAt: -1 });
+commentSchema.index({ parentComment: 1, createdAt: -1 });
 
 export const Comment = mongoose.model("Comment", commentSchema)
