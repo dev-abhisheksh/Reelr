@@ -33,8 +33,7 @@ import ApiError from "../utils/apiError.js";
 const verifyJWT = async (req, res, next) => {
   try {
     console.log("Cookies:", req.cookies);
-    console.log("Auth Header:", req.header("Authorization"));
-    const token = req.cookies?.accessToken || req.header?.authorization?.replace("Bearer ", "")
+    const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "") || req.headers?.authorization?.replace("Bearer ", "")
 
     if (!token) throw new ApiError(401, "Unauthorized request")
 

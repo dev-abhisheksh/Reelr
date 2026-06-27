@@ -29,20 +29,24 @@ const generateRefreshToken = (user) => {
 
 const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: true, // Always secure for sameSite "none" or production
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
 };
 
 const registerUser = async (req, res) => {
     try {
         const { fullName, username, email, password, role } = req.body;
-        if (!username || !email || !password || !role) {
-            return res.status(400).json({ message: "All fields are necessary" })
+        if (!username || !email || !password) {
+            return res.status(400).json({ message: "Username, email, and password are required" })
         }
 
-        const existinguser = await User.findOne({ username });
-        if (existinguser) {
-            return res.status(400).json({ message: "User already exists . Kindly Login" })
+        // Check for existing username or email
+        const existingUser = await User.findOne({
+            $or: [{ username }, { email }]
+        });
+        if (existingUser) {
+            const field = existingUser.email === email ? "Email" : "Username";
+            return res.status(400).json({ message: `${field} is already in use. Kindly login.` })
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -52,14 +56,14 @@ const registerUser = async (req, res) => {
             username,
             email,
             password: hashedPassword,
-            role: "viewer"
+            role: ["viewer", "creator"].includes(role) ? role : "viewer"
         })
 
         const createdUser = await User.findById(user._id).select(
             "-password -refreshToken"
         )
 
-        //generating tokens here
+        // generating tokens here
         const accessToken = generateAccessToken(user)
         const refreshToken = generateRefreshToken(user)
 
@@ -67,7 +71,7 @@ const registerUser = async (req, res) => {
         res.cookie("refreshToken", refreshToken, cookieOptions)
 
         user.refreshToken = refreshToken;
-        await user.save({validateBeforeSave: false})
+        await user.save({ validateBeforeSave: false })
 
         res.status(201).json({ message: "User registered successfully", createdUser })
 
@@ -150,7 +154,10 @@ const verifyUser = (req, res) => {
 
 const logoutUser = async (req, res) => {
     try {
-        const userId = req.user?.id;
+        if (req.user) {
+            req.user.refreshToken = null;
+            await req.user.save({ validateBeforeSave: false });
+        }
 
         res.clearCookie('accessToken', cookieOptions);
         res.clearCookie('refreshToken', cookieOptions);
@@ -190,7 +197,7 @@ const refreshTokenRotation = asyncHandler(async (req, res) => {
     }
 
     const newAccessToken = generateAccessToken(user)
-    const newRefreshToken = generateRefreshToken(user._id)
+    const newRefreshToken = generateRefreshToken(user)
 
     user.refreshToken = newRefreshToken;
     await user.save({ validateBeforeSave: false })
