@@ -135,18 +135,11 @@ const loginUser = async (req, res) => {
 };
 
 const verifyUser = (req, res) => {
-    if (!req.user) {
-        return res.status(401).json({
-            success: false,
-            message: "user not authenticated"
-        });
-    }
-
     return res.status(200).json({
         success: true,
         message: "User authenticated",
         user: req.user
-    })
+    });
 };
 
 

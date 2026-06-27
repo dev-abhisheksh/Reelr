@@ -1,23 +1,34 @@
 import React,{ createContext, useContext, useEffect, useState } from "react";
-import { verifyUser } from "../api/auth.api";
+import { verifyUserIdentity } from "../api/auth.api";
 
-
-const AuthContext = createContext()
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null)
+    const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
+    const verifyUser = async () => {
+        try {
+            const res = await verifyUserIdentity()
+            setUser(res.data.user)
+        } catch (error) {
+            setUser(null)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(()=>{
         verifyUser()
-            .then((res) => setUser(res.data.user))
-            .catch(() => setUser(null))
-    }, [])
+    },[])
 
-    return(
-        <AuthContext.Provider value={{user, setUser}}>
-             {children}
+    return (
+        <AuthContext.Provider value={{ user, setUser, loading, setLoading }}>
+            {children}
         </AuthContext.Provider>
     )
 }
 
-export const useAuth =()=> useContext(AuthContext)
+export const useAuth = ()=>{
+    return useContext(AuthContext)
+}
