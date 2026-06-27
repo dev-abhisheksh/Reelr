@@ -2,6 +2,8 @@ import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs";
+import asyncHandler from "../middlewares/asyncHandler.middleware.js";
+import ApiError from "../utils/apiError.js";
 
 const generateAccessToken = (user) => {
     return jwt.sign(
@@ -25,11 +27,17 @@ const generateRefreshToken = (user) => {
     );
 };
 
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+};
+
 const registerUser = async (req, res) => {
     try {
         const { fullName, username, email, password, role } = req.body;
         if (!username || !email || !password || !role) {
-            return res.status(404).json({ message: "All fields are necessary" })
+            return res.status(400).json({ message: "All fields are necessary" })
         }
 
         const existinguser = await User.findOne({ username });
@@ -55,13 +63,13 @@ const registerUser = async (req, res) => {
         const accessToken = generateAccessToken(user)
         const refreshToken = generateRefreshToken(user)
 
-        res.cookie("accessToken", accessToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-        })
+        res.cookie("accessToken", accessToken, cookieOptions)
+        res.cookie("refreshToken", refreshToken, cookieOptions)
 
-        res.status(201).json({ message: "User registered successfully", createdUser, accessToken, refreshToken })
+        user.refreshToken = refreshToken;
+        await user.save({validateBeforeSave: false})
+
+        res.status(201).json({ message: "User registered successfully", createdUser })
 
     } catch (error) {
         console.error(error)
@@ -104,14 +112,11 @@ const loginUser = async (req, res) => {
         const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user);
 
-        const cookieOptions = {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-        };
-
         res.cookie("accessToken", accessToken, cookieOptions);
         res.cookie("refreshToken", refreshToken, cookieOptions);
+
+        user.refreshToken = refreshToken;
+        await user.save({validateBeforeSave: false})
 
         return res.status(200).json({
             success: true,
@@ -146,15 +151,6 @@ const verifyUser = (req, res) => {
 const logoutUser = async (req, res) => {
     try {
         const userId = req.user?.id;
-        // console.log("REQ.USER IN LOGOUT:", req.user);
-
-        // Just clear the cookies - no database operation needed
-        const cookieOptions = {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            path: '/'
-        };
 
         res.clearCookie('accessToken', cookieOptions);
         res.clearCookie('refreshToken', cookieOptions);
@@ -172,9 +168,46 @@ const logoutUser = async (req, res) => {
     }
 };
 
+const refreshTokenRotation = asyncHandler(async (req, res) => {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) throw new ApiError(401, "Not authorized");
+
+    let decoded;
+    try {
+        decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
+    } catch (error) {
+        throw new ApiError(401, "Invalid or expired refresh token");
+    }
+
+    const user = await User.findById(decoded._id)
+    if (!user) throw new ApiError(401, "User not found")
+
+    if (user.refreshToken !== refreshToken) {
+        user.refreshToken = null;
+        await user.save({ validateBeforeSave: false })
+
+        throw new ApiError(401, "Refresh token reuse detected. Please login again.")
+    }
+
+    const newAccessToken = generateAccessToken(user)
+    const newRefreshToken = generateRefreshToken(user._id)
+
+    user.refreshToken = newRefreshToken;
+    await user.save({ validateBeforeSave: false })
+
+    res.cookie("accessToken", newAccessToken, cookieOptions)
+    res.cookie("refreshToken", newRefreshToken, cookieOptions)
+
+    return res.status(200).json({
+        success: true,
+        message: "Tokens refreshed successfully",
+    });
+})
+
 export {
     registerUser,
     loginUser,
     verifyUser,
-    logoutUser
+    logoutUser,
+    refreshTokenRotation
 }
