@@ -1,7 +1,26 @@
 import axios from "axios";
 
+const getBaseURL = () => {
+    // 1. If Vite environment variable is set and is NOT localhost, use it
+    const envUrl = import.meta.env.VITE_API_URL;
+    if (envUrl && !envUrl.includes("localhost")) {
+        return envUrl;
+    }
+
+    // 2. If we are running in the browser on localhost, use local port 8000
+    if (typeof window !== "undefined") {
+        const hostname = window.location.hostname;
+        if (hostname === "localhost" || hostname === "127.0.0.1" || hostname.startsWith("192.168.")) {
+            return "http://localhost:8000";
+        }
+    }
+
+    // 3. Fallback to production URL in case Vite env wasn't compiled correctly
+    return "https://reelr.onrender.com";
+};
+
 export const API = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
+    baseURL: getBaseURL(),
     withCredentials: true,
 });
 

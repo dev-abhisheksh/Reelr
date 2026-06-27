@@ -29,7 +29,7 @@ const generateRefreshToken = (user) => {
 
 const cookieOptions = {
     httpOnly: true,
-    secure: true, // Always secure for sameSite "none" or production
+    secure: process.env.NODE_ENV === "production", // Must be true in production for sameSite 'none'
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
 };
 
