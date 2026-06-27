@@ -8,3 +8,5 @@ export const registerUser = (data) => API.post("/auth/register", data);
 
 export const logout = () => API.get("/auth/logout");
 
+export const refreshToken = () => API.post("/auth/refresh-token");
+
