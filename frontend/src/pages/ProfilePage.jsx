@@ -15,6 +15,8 @@ import ProfileStats from "../components/profile/ProfileStats";
 import ReelsGrid from "../components/profile/ReelsGrid";
 import EditProfileForm from "../components/profile/EditProfileForm";
 import ReelDetailModal from "../components/profile/ReelDetailModal";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
   const queryClient = useQueryClient();
@@ -32,6 +34,9 @@ const ProfilePage = () => {
   const [isEditing, setisEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
+
+  const { user, setUser, loading: authLoading } = useAuth()
+  const navigate = useNavigate();
 
   // Fetch profile via React Query
   const { data: profileResponse, isLoading: isProfileLoading } = useQuery({
@@ -202,11 +207,10 @@ const ProfilePage = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      setUser(null)
       queryClient.clear(); // Clear cache on logout to prevent leaks
       toast.success("Logged out successfully");
-      window.location.href = "/login";
+      navigate("/login", { replace: true });
     } catch (err) {
       console.error("Logout failed:", err);
     }

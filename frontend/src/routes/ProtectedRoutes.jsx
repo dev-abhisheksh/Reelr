@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { verifyUser } from "../api/auth.api";
+import { verifyUserIdentity } from "../api/auth.api";
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoutes = ({ children }) => {
@@ -8,7 +8,7 @@ const ProtectedRoutes = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await verifyUser();
+        const res = await verifyUserIdentity();
         setAuth(!!res.data.user);
       } catch {
         setAuth(false);

@@ -19,13 +19,13 @@ const queryClient = new QueryClient()
 createRoot(document.getElementById('root')).render(
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
-      <NotificationProvider>
-        <SocketProvider>
-          <AuthProvider>
+      <AuthProvider>
+        <NotificationProvider>
+          <SocketProvider>
             <App />
-          </AuthProvider>
-        </SocketProvider>
-      </NotificationProvider>
+          </SocketProvider>
+        </NotificationProvider>
+      </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>
 )

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { getAllReels } from '../api/reels.api';
+import { useAuth } from './AuthContext';
 
 const ReelsContext = createContext();
 
@@ -11,11 +12,13 @@ export const useReels = () => {
   return context;
 };
 
+
 export const ReelsProvider = ({ children }) => {
   const [reels, setReels] = useState([]);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const { user, loading: authLoading } = useAuth()
 
   // ✅ Persist viewedSet across navigation
   const getInitialViewedSet = () => {
@@ -40,17 +43,23 @@ export const ReelsProvider = ({ children }) => {
 
   // ✅ Fetch reels only once and shuffle them
   useEffect(() => {
-    if (reels.length === 0 && !isLoading) {
+    if (authLoading) return;
+    if (!user) return;
+    if (reels.length > 0) return;
+
+    const fetchReels = async () => {
       setIsLoading(true);
-      getAllReels()
-        .then(res => {
-          const shuffledReels = shuffleArray(res.data.allReels); // ✅ Shuffle here
-          setReels(shuffledReels);
-        })
-        .catch(err => console.error(err))
-        .finally(() => setIsLoading(false));
-    }
-  }, []);
+
+      try {
+        const res = await getAllReels();
+        setReels(shuffleArray(res.data.allReels));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReels();
+  }, [user, authLoading]);
 
   const updateReelViews = (reelId) => {
     setReels((prev) =>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { loginUser } from '../api/auth.api'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast, Toaster } from 'sonner'
+import { useAuth } from '../context/AuthContext'
 
 
 const LoginPage = () => {
@@ -9,6 +10,7 @@ const LoginPage = () => {
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
+    const {user, setUser, loding:authLoading} = useAuth()
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -16,13 +18,8 @@ const LoginPage = () => {
 
         try {
             const res = await loginUser({ email, password });
-            const { accessToken, user } = res.data;
 
-            // console.log("Access Token Stored:", accessToken);
-            localStorage.setItem("accessToken", accessToken);
-            localStorage.setItem("user", JSON.stringify(user));
-            const storedUser = JSON.parse(localStorage.getItem("user"));
-            console.log("User from localStorage:", storedUser); // what does this print?
+            setUser(res.data.user)
 
             toast.success("User Logged In successfully");
             navigate("/");
