@@ -4,6 +4,12 @@ import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs";
 import asyncHandler from "../middlewares/asyncHandler.middleware.js";
 import ApiError from "../utils/apiError.js";
+import { Session } from "../models/session.model.js";
+import crypto from "crypto";
+
+const hashToken = (token) => {
+    return crypto.createHash("sha256").update(token).digest("hex");
+};
 
 const generateAccessToken = (user) => {
     return jwt.sign(
@@ -64,8 +70,32 @@ const registerUser = async (req, res) => {
         )
 
         // generating tokens here
+        const refreshToken = generateAccessTokenR = ({ user, session }) => {
+            return jwt.sign(
+                {
+                    _id: user._id,
+                    email: user.email,
+                    username: user.username,
+                    fullName: user.fullName,
+                    role: user.role,
+                    sessionId: session._id
+
+                },
+                process.env.ACCESS_TOKEN_SECRET,
+                { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+            )
+        }
+
+        const refreshTokenHash = hashToken(refreshToken)
+
+        const session = await Session.create({
+            userId: req._id,
+            refreshTokenHash,
+            ip: req.ip,
+            userAgent: req.headers["user-agent"]
+        })
+
         const accessToken = generateAccessToken(user)
-        const refreshToken = generateRefreshToken(user)
 
         res.cookie("accessToken", accessToken, cookieOptions)
         res.cookie("refreshToken", refreshToken, cookieOptions)
@@ -120,7 +150,7 @@ const loginUser = async (req, res) => {
         res.cookie("refreshToken", refreshToken, cookieOptions);
 
         user.refreshToken = refreshToken;
-        await user.save({validateBeforeSave: false})
+        await user.save({ validateBeforeSave: false })
 
         return res.status(200).json({
             success: true,
@@ -154,10 +184,28 @@ const verifyUser = (req, res) => {
 
 const logoutUser = async (req, res) => {
     try {
-        if (req.user) {
-            req.user.refreshToken = null;
-            await req.user.save({ validateBeforeSave: false });
-        }
+
+        const refreshToken = req.cookies?.refreshToken;
+        if (!refreshToken) return res.status(400).json({
+            message: "RefreshToken not found"
+        })
+
+        const refreshTokenHash = hashToken(refreshToken)
+
+        const session = await Session.findOne({
+            refreshTokenHash,
+            revoked: false
+        })
+
+        if (!session) return res.status(400).json({ message: "Invalid RefreshToken" })
+
+            session.revoked = true;
+            await session.save()
+
+        // if (req.user) {
+        //     req.user.refreshToken = null;
+        //     await req.user.save({ validateBeforeSave: false });
+        // }
 
         res.clearCookie('accessToken', cookieOptions);
         res.clearCookie('refreshToken', cookieOptions);
