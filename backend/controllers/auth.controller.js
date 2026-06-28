@@ -148,8 +148,17 @@ const loginUser = async (req, res) => {
             });
         }
 
-        const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user);
+        const refreshTokenHash = hashToken(refreshToken)
+
+        const session = await Session.create({
+            userId: user._id,
+            refreshTokenHash,
+            ip: req.ip,
+            userAgent: req.headers["user-agent"]
+        })
+
+        const accessToken = generateAccessTokenWithSession({user, session});
 
         res.cookie("accessToken", accessToken, cookieOptions);
         res.cookie("refreshToken", refreshToken, cookieOptions);
@@ -280,7 +289,7 @@ const logoutAllUsers = asyncHandler(async (req, res) => {
 
     await Session.updateMany({
         userId: user._id,
-        revoked: false
+        revoked: false      
     }, {
         revoked: true
     })
