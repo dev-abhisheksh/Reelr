@@ -33,6 +33,21 @@ const generateRefreshToken = (user) => {
     );
 };
 
+const generateAccessTokenWithSession = ({ user, session }) => {
+    return jwt.sign(
+        {
+            _id: user._id,
+            email: user.email,
+            username: user.username,
+            fullName: user.fullName,
+            role: user.role,
+            sessionId: session._id
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    );
+};
+
 const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production", // Must be true in production for sameSite 'none'
@@ -40,76 +55,66 @@ const cookieOptions = {
 };
 
 const registerUser = async (req, res) => {
+    const mongoSession = await mongoose.startSession();
+    mongoSession.startTransaction();
+
     try {
         const { fullName, username, email, password, role } = req.body;
         if (!username || !email || !password) {
-            return res.status(400).json({ message: "Username, email, and password are required" })
+            await mongoSession.abortTransaction();
+            mongoSession.endSession();
+            return res.status(400).json({ message: "Username, email, and password are required" });
         }
 
-        // Check for existing username or email
-        const existingUser = await User.findOne({
-            $or: [{ username }, { email }]
-        });
+        const existingUser = await User.findOne({ $or: [{ username }, { email }] }).session(mongoSession);
         if (existingUser) {
+            await mongoSession.abortTransaction();
+            mongoSession.endSession();
             const field = existingUser.email === email ? "Email" : "Username";
-            return res.status(400).json({ message: `${field} is already in use. Kindly login.` })
+            return res.status(400).json({ message: `${field} is already in use. Kindly login.` });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await User.create({
-            fullName,
+        const [user] = await User.create([{
+            fullName,   
             username,
             email,
             password: hashedPassword,
             role: ["viewer", "creator"].includes(role) ? role : "viewer"
-        })
+        }], { session: mongoSession });
 
-        const createdUser = await User.findById(user._id).select(
-            "-password -refreshToken"
-        )
+        const createdUser = await User.findById(user._id)
+            .select("-password -refreshToken")
+            .session(mongoSession);
 
-        // generating tokens here
-        const refreshToken = generateAccessTokenR = ({ user, session }) => {
-            return jwt.sign(
-                {
-                    _id: user._id,
-                    email: user.email,
-                    username: user.username,
-                    fullName: user.fullName,
-                    role: user.role,
-                    sessionId: session._id
+        const refreshToken = generateRefreshToken(user);
+        const refreshTokenHash = hashToken(refreshToken);
 
-                },
-                process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
-            )
-        }
-
-        const refreshTokenHash = hashToken(refreshToken)
-
-        const session = await Session.create({
-            userId: req._id,
+        const [session] = await Session.create([{
+            userId: user._id,
             refreshTokenHash,
             ip: req.ip,
             userAgent: req.headers["user-agent"]
-        })
+        }], { session: mongoSession });
 
-        const accessToken = generateAccessToken(user)
+        const accessToken = generateAccessTokenWithSession({ user, session });
 
-        res.cookie("accessToken", accessToken, cookieOptions)
-        res.cookie("refreshToken", refreshToken, cookieOptions)
+        await mongoSession.commitTransaction();
+        mongoSession.endSession();
 
-        user.refreshToken = refreshToken;
-        await user.save({ validateBeforeSave: false })
+        res.cookie("accessToken", accessToken, cookieOptions);
+        res.cookie("refreshToken", refreshToken, cookieOptions);
 
-        res.status(201).json({ message: "User registered successfully", createdUser })
+        return res.status(201).json({ message: "User registered successfully", createdUser });
 
     } catch (error) {
-        console.error(error)
-        res.status(500).json({ message: "Failed to create user. Internal Server Error" })
+        await mongoSession.abortTransaction();
+        mongoSession.endSession();
+        console.error(error);
+        return res.status(500).json({ message: "Failed to create user. Internal Server Error" });
     }
-}
+};
 
 const loginUser = async (req, res) => {
     try {
@@ -199,8 +204,8 @@ const logoutUser = async (req, res) => {
 
         if (!session) return res.status(400).json({ message: "Invalid RefreshToken" })
 
-            session.revoked = true;
-            await session.save()
+        session.revoked = true;
+        await session.save()
 
         // if (req.user) {
         //     req.user.refreshToken = null;
