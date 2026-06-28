@@ -6,8 +6,6 @@ export const verifyUserIdentity = () => API.get("/auth/verify");
 
 export const registerUser = (data) => API.post("/auth/register", data);
 
-export const logout = () => API.get("/auth/logout");
+export const logout = (all = false) => API.get(`/auth/logout${all ? "?all=true" : ""}`);
 
 export const refreshToken = () => API.post("/auth/refresh-token");
-
-export const logoutFromAllDevices = ()=> API.get("/auth/logout-all")

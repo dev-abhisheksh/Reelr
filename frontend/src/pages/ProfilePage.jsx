@@ -15,6 +15,7 @@ import ProfileStats from "../components/profile/ProfileStats";
 import ReelsGrid from "../components/profile/ReelsGrid";
 import EditProfileForm from "../components/profile/EditProfileForm";
 import ReelDetailModal from "../components/profile/ReelDetailModal";
+import LogoutModal from "../components/profile/LogoutModal";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -34,6 +35,7 @@ const ProfilePage = () => {
   const [isEditing, setisEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const { user, setUser, loading: authLoading } = useAuth()
   const navigate = useNavigate();
@@ -204,15 +206,17 @@ const ProfilePage = () => {
     setEditForm(!editForm);
   };
 
-  const handleLogout = async () => {
+  const handleLogout = async (allDevices = false) => {
     try {
-      await logout();
-      setUser(null)
+      await logout(allDevices);
+      setUser(null);
       queryClient.clear(); // Clear cache on logout to prevent leaks
-      toast.success("Logged out successfully");
+      toast.success(allDevices ? "Logged out from all devices successfully" : "Logged out successfully");
+      setIsLogoutModalOpen(false);
       navigate("/login", { replace: true });
     } catch (err) {
       console.error("Logout failed:", err);
+      toast.error("Logout failed");
     }
   };
 
@@ -233,7 +237,7 @@ const ProfilePage = () => {
     <div className="bg-black text-white min-h-screen flex flex-col items-center pb-12">
       <ProfileHeader
         userDetails={userDetails}
-        onLogout={handleLogout}
+        onLogout={() => setIsLogoutModalOpen(true)}
         onToggleEdit={toggleEditForm}
       />
 
@@ -280,6 +284,12 @@ const ProfilePage = () => {
         onSubmit={handleSubmit}
         profileRef={profileRef}
         coverRef={coverRef}
+      />
+
+      <LogoutModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onLogout={handleLogout}
       />
     </div>
   );
