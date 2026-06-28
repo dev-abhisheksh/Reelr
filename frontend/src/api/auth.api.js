@@ -10,3 +10,4 @@ export const logout = () => API.get("/auth/logout");
 
 export const refreshToken = () => API.post("/auth/refresh-token");
 
+export const logoutFromAllDevices = ()=> API.get("/auth/logout-all")

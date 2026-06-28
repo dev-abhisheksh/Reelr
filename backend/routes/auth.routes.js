@@ -1,7 +1,7 @@
 import express from "express";
 import verifyJWT from "../middlewares/auth.middleware.js";
 import allowRoles from "../middlewares/role.middleware.js";
-import { loginUser, logoutUser, registerUser, verifyUser, refreshTokenRotation } from "../controllers/auth.controller.js";
+import { loginUser, logoutUser, registerUser, verifyUser, refreshTokenRotation, logoutAllUsers } from "../controllers/auth.controller.js";
 import { upload } from "../config/multer.js";
 // import { uploadProfileImage } from "../controllers/user.controller.js";
 
@@ -13,5 +13,6 @@ router.post("/login", loginUser);
 router.post("/refresh-token", refreshTokenRotation);
 router.get("/verify", verifyJWT, verifyUser)
 router.get("/logout",verifyJWT, logoutUser)
+router.get("/logout-all", verifyJWT, logoutAllUsers)
 
 export default router

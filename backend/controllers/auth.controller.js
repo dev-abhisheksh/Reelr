@@ -308,5 +308,6 @@ export {
     loginUser,
     verifyUser,
     logoutUser,
-    refreshTokenRotation
+    refreshTokenRotation,
+    logoutAllUsers
 }
