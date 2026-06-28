@@ -77,7 +77,7 @@ const registerUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const [user] = await User.create([{
-            fullName,   
+            fullName,
             username,
             email,
             password: hashedPassword,
@@ -234,35 +234,35 @@ const refreshTokenRotation = asyncHandler(async (req, res) => {
 
     let decoded;
     try {
-        decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
+        decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
     } catch (error) {
         throw new ApiError(401, "Invalid or expired refresh token");
     }
 
-    const user = await User.findById(decoded._id)
-    if (!user) throw new ApiError(401, "User not found")
+    const user = await User.findById(decoded._id);
+    if (!user) throw new ApiError(401, "User not found");
 
-    if (user.refreshToken !== refreshToken) {
-        user.refreshToken = null;
-        await user.save({ validateBeforeSave: false })
+    const refreshTokenHash = hashToken(refreshToken);
+    const session = await Session.findOne({ refreshTokenHash, revoked: false });
 
-        throw new ApiError(401, "Refresh token reuse detected. Please login again.")
+    if (!session) {
+        await Session.updateMany({ userId: user._id }, { revoked: true });
+        throw new ApiError(401, "Refresh token reuse detected. Please login again.");
     }
 
-    const newAccessToken = generateAccessToken(user)
-    const newRefreshToken = generateRefreshToken(user)
+    const newRefreshToken = generateRefreshToken(user);
+    const newRefreshTokenHash = hashToken(newRefreshToken);
 
-    user.refreshToken = newRefreshToken;
-    await user.save({ validateBeforeSave: false })
+    session.refreshTokenHash = newRefreshTokenHash;
+    await session.save();
 
-    res.cookie("accessToken", newAccessToken, cookieOptions)
-    res.cookie("refreshToken", newRefreshToken, cookieOptions)
+    const newAccessToken = generateAccessTokenWithSession({ user, session });
 
-    return res.status(200).json({
-        success: true,
-        message: "Tokens refreshed successfully",
-    });
-})
+    res.cookie("accessToken", newAccessToken, cookieOptions);
+    res.cookie("refreshToken", newRefreshToken, cookieOptions);
+
+    return res.status(200).json({ success: true, message: "Tokens refreshed successfully" });
+});
 
 export {
     registerUser,
