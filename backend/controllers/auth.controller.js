@@ -264,6 +264,36 @@ const refreshTokenRotation = asyncHandler(async (req, res) => {
     return res.status(200).json({ success: true, message: "Tokens refreshed successfully" });
 });
 
+const logoutAllUsers = asyncHandler(async (req, res) => {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) throw new ApiError(400, "RefreshToken not found")
+
+    let decoded;
+    try {
+        decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    } catch (error) {
+        throw new ApiError(401, "Invalid or expired refresh token");
+    }
+
+    const user = await User.findById(decoded._id)
+    if (!user) throw new ApiError(404, "User not found")
+
+    await Session.updateMany({
+        userId: user._id,
+        revoked: false
+    }, {
+        revoked: true
+    })
+
+    res.clearCookie("accessToken", cookieOptions);
+    res.clearCookie("refreshToken", cookieOptions);
+
+    return res.status(200).json({
+        success: true,
+        message: "LoggedOut successfully from all devices"
+    })
+})
+
 export {
     registerUser,
     loginUser,
