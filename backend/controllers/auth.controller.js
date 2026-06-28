@@ -198,41 +198,54 @@ const verifyUser = (req, res) => {
 
 const logoutUser = async (req, res) => {
     try {
-
         const refreshToken = req.cookies?.refreshToken;
-        if (!refreshToken) return res.status(400).json({
-            message: "RefreshToken not found"
-        })
+        if (!refreshToken) {
+            return res.status(400).json({
+                success: false,
+                message: "RefreshToken not found"
+            });
+        }
 
-        const refreshTokenHash = hashToken(refreshToken)
+        const isLogoutAll = req.query.all === "true";
 
-        const session = await Session.findOne({
-            refreshTokenHash,
-            revoked: false
-        })
+        if (isLogoutAll) {
+            // Revoke all active sessions for this user
+            await Session.updateMany(
+                { userId: req.user._id, revoked: false },
+                { revoked: true }
+            );
+        } else {
+            // Revoke only the current session
+            const refreshTokenHash = hashToken(refreshToken);
+            const session = await Session.findOne({
+                refreshTokenHash,
+                revoked: false
+            });
 
-        if (!session) return res.status(400).json({ message: "Invalid RefreshToken" })
+            if (!session) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid RefreshToken"
+                });
+            }
 
-        session.revoked = true;
-        await session.save()
+            session.revoked = true;
+            await session.save();
+        }
 
-        // if (req.user) {
-        //     req.user.refreshToken = null;
-        //     await req.user.save({ validateBeforeSave: false });
-        // }
-
-        // res.clearCookie('accessToken', cookieOptions);
-        // res.clearCookie('refreshToken', cookieOptions);
+        // Clear cookies on the browser
+        res.clearCookie("accessToken", cookieOptions);
+        res.clearCookie("refreshToken", cookieOptions);
 
         return res.status(200).json({
-            message: "User logged out successfully",
-            success: true
+            success: true,
+            message: isLogoutAll ? "Logged out from all devices successfully" : "User logged out successfully"
         });
     } catch (error) {
         console.error("Logout error:", error);
         return res.status(500).json({
             success: false,
-            message: 'Logout failed'
+            message: "Logout failed"
         });
     }
 };
