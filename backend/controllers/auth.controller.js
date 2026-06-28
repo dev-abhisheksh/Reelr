@@ -212,8 +212,8 @@ const logoutUser = async (req, res) => {
         //     await req.user.save({ validateBeforeSave: false });
         // }
 
-        res.clearCookie('accessToken', cookieOptions);
-        res.clearCookie('refreshToken', cookieOptions);
+        // res.clearCookie('accessToken', cookieOptions);
+        // res.clearCookie('refreshToken', cookieOptions);
 
         return res.status(200).json({
             message: "User logged out successfully",
@@ -247,7 +247,7 @@ const refreshTokenRotation = asyncHandler(async (req, res) => {
 
     if (!session) {
         await Session.updateMany({ userId: user._id }, { revoked: true });
-        throw new ApiError(401, "Refresh token reuse detected. Please login again.");
+        throw new ApiError(401, "Invalid RefreshToken");
     }
 
     const newRefreshToken = generateRefreshToken(user);
