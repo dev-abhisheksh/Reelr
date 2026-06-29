@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { fetchNotifications } from '../api/notification.api'
 import { Bell, Check, X } from 'lucide-react'
 import { acceptFollowRequest } from '../api/follow.api'
+import NotificationSkeleton from '../components/notification/NotificationSkeleton'
 
 const NotificationPage = () => {
 
@@ -58,9 +59,7 @@ const NotificationPage = () => {
             <div className='max-w-[470px] mx-auto px-3 py-4'>
 
                 {loading ? (
-                    <div className='flex items-center justify-center py-10'>
-                        <div className='h-8 w-8 rounded-full border-2 border-white/20 border-t-white animate-spin' />
-                    </div>
+                    <NotificationSkeleton />
                 ) : notifications.length === 0 ? (
 
                     <div className='flex flex-col items-center justify-center py-20 text-center'>

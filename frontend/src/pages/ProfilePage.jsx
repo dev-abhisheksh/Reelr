@@ -18,6 +18,7 @@ import ReelDetailModal from "../components/profile/ReelDetailModal";
 import LogoutModal from "../components/profile/LogoutModal";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import Spinner from "../components/ui/Spinner";
 
 const ProfilePage = () => {
   const queryClient = useQueryClient();
@@ -224,7 +225,7 @@ const ProfilePage = () => {
     return (
       <div className="w-full min-h-screen flex items-center justify-center bg-black">
         <div className="flex flex-col items-center gap-4 text-zinc-400">
-          <div className="w-8 h-8 border-2 border-zinc-800 border-t-white rounded-full animate-spin" />
+          <Spinner size="md" />
           <span className="text-sm tracking-wide">
             Loading profile...
           </span>

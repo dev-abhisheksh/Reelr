@@ -3,6 +3,7 @@ import { loginUser } from '../api/auth.api'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast, Toaster } from 'sonner'
 import { useAuth } from '../context/AuthContext'
+import Spinner from '../components/ui/Spinner'
 
 
 const LoginPage = () => {
@@ -81,7 +82,7 @@ const LoginPage = () => {
                                 disabled={loading}
                             >
                                 {loading ? (
-                                    <div className="w-6 h-6 border-6 border-white rounded-full animate-spin"></div>
+                                    <Spinner size="sm" className="border-t-black border-zinc-300" />
                                 ) : (
                                     "Login"
                                 )}
