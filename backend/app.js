@@ -12,8 +12,9 @@ import followRoutes from "./routes/follow.route.js"
 import notificationRoutes from "./routes/notification.route.js"
 import searchRoutes from "./routes/search.route.js"
 import commentRoutes from "./modules/user/comment.route.js"
+import statusRouter from "./modules/status/status.route.js"
 
-dotenv.config()
+dotenv.config() 
 
 const app = express();
 
@@ -35,6 +36,6 @@ app.use("/post", postRoutes)
 app.use("/follow", followRoutes)
 app.use("/notification", notificationRoutes)
 app.use("/search", searchRoutes)
-
+app.use("/status",statusRouter)
     
 export { app }

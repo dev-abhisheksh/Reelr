@@ -1,14 +1,16 @@
-import asyncHandler from "../../middlewares/asyncHandler.middleware";
-import ApiError from "../../utils/apiError";
-import { uploadImage, uploadVideo } from "../../utils/uploadFunction";
-import { Status } from "./status.model";
+import asyncHandler from "../../middlewares/asyncHandler.middleware.js";
+import ApiError from "../../utils/apiError.js";
+import { uploadImage, uploadVideo } from "../../utils/uploadFunction.js";
+import { Status } from "./status.model.js";
 
 const addStatus = asyncHandler(async (req, res) => {
     const { text } = req.body;
-    if (!text || !req.file) throw new ApiError(400, "Atleast one input field is required")
+    if (!text && !req.file) {
+        throw new ApiError(400, "At least one input field is required");
+    }
 
     let mediaUrl = ""
-    let statusType = "text";
+    let statusType = "text";    
 
     if (req.file) {
         if (req.file.mimetype.startsWith("image/")) {
