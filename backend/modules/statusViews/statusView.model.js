@@ -20,6 +20,6 @@ const statusViewSchema = new mongoose.Schema({
     }
 }, { timestamps: false })
 
-statusViewsSchema.index({ statusId: 1, viewerId: 1 }, { unique: true })
+statusViewSchema.index({ statusId: 1, viewerId: 1 }, { unique: true })
 
 export const StatusView = mongoose.model("StatusView", statusViewSchema)
