@@ -1,4 +1,5 @@
 import asyncHandler from "../../middlewares/asyncHandler.middleware.js";
+import { Follow } from "../../models/follow.model.js";
 import ApiError from "../../utils/apiError.js";
 import { uploadImage, uploadVideo } from "../../utils/uploadFunction.js";
 import { Status } from "./status.model.js";
@@ -10,7 +11,7 @@ const addStatus = asyncHandler(async (req, res) => {
     }
 
     let mediaUrl = ""
-    let statusType = "text";    
+    let statusType = "text";
 
     if (req.file) {
         if (req.file.mimetype.startsWith("image/")) {
@@ -38,6 +39,29 @@ const addStatus = asyncHandler(async (req, res) => {
 
 })
 
+const fetchStatus = asyncHandler(async (req, res) => {
+    const users = await Follow.find({
+        follower: req.user._id,
+        status: "accepted"
+    }).select("following")
+
+    const followingIds = await users.map(id => id.following)
+    console.log(followingIds)
+
+    const status = await Status.find({
+        userId: { $in: followingIds }
+    })
+    .populate("userId", "profileImage")
+    .select("-createdAt -__v")
+
+    return res.status(200).json({
+        success: true,
+        message: "Status fetched",
+        status
+    })
+})
+
 export {
-    addStatus
+    addStatus,
+    fetchStatus
 }
