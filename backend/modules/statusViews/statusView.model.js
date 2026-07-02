@@ -12,7 +12,6 @@ const statusViewSchema = new mongoose.Schema({
         ref: "User",
         required: true
     },
-
     viewdAt: {
         type: Date,
         default: Date.now,

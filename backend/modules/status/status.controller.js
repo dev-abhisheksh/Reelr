@@ -2,6 +2,7 @@ import asyncHandler from "../../middlewares/asyncHandler.middleware.js";
 import { Follow } from "../../models/follow.model.js";
 import ApiError from "../../utils/apiError.js";
 import { uploadImage, uploadVideo } from "../../utils/uploadFunction.js";
+import { StatusView } from "../statusViews/statusView.model.js";
 import { Status } from "./status.model.js";
 
 const addStatus = asyncHandler(async (req, res) => {
@@ -51,13 +52,20 @@ const fetchStatus = asyncHandler(async (req, res) => {
     const status = await Status.find({
         userId: { $in: followingIds }
     })
-    .populate("userId", "profileImage")
-    .select("-createdAt -__v")
+        .populate("userId", "profileImage")
+        .select("-createdAt -__v")
+
+    const statusWithViews = await Promise.all(
+        status.map(async (s) => {
+            const viewCount = await StatusView.countDocuments({ statusId: s._id })
+            return { ...s.toObject(), viewCount }
+        })
+    )
 
     return res.status(200).json({
         success: true,
         message: "Status fetched",
-        status
+        statusWithViews
     })
 })
 
