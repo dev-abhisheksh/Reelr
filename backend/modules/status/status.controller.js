@@ -52,7 +52,7 @@ const fetchStatus = asyncHandler(async (req, res) => {
     const status = await Status.find({
         userId: { $in: followingIds }
     })
-        .populate("userId", "profileImage")
+        .populate("userId", "profileImage username")
         .select("-createdAt -__v")
 
     const statusWithViews = await Promise.all(
