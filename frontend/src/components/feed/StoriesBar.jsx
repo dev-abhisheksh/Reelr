@@ -1,10 +1,14 @@
 import React, { useState, useMemo } from "react";
 import { useStatus } from "../../hooks/useStatus";
+import { useAuth } from "../../context/AuthContext";
 import StatusViewer from "./StatusViewer";
+import UploadStatusModal from "./UploadStatusModal";
 
 const StoriesBar = () => {
   const { data, isLoading } = useStatus();
+  const { user: currentUser } = useAuth();
   const [activeUserIdx, setActiveUserIdx] = useState(null);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   // Group status items by userId so each user appears only once in the stories bar
   const groupedStories = useMemo(() => {
@@ -24,14 +28,43 @@ const StoriesBar = () => {
     return Object.values(groups);
   }, [data]);
 
-  if (isLoading || groupedStories.length === 0) {
-    return null; // Keep it clean if loading or no stories
+  if (isLoading) {
+    return null; // Keep it clean if loading
   }
 
   return (
     <div className="pt-[52px]">
       <div className="max-w-[470px] mx-auto border-b border-white/[0.06]">
         <div className="flex gap-4 px-4 py-3 overflow-x-auto scrollbar-hide">
+          
+          {/* Current User Story bubble ("Your Story") */}
+          <div
+            onClick={() => setIsUploadOpen(true)}
+            className="flex flex-col items-center gap-1 shrink-0 cursor-pointer group"
+          >
+            <div className="relative w-[62px] h-[62px] rounded-full p-[2px] bg-zinc-800 transition-transform duration-200 group-hover:scale-105 border border-white/[0.08]">
+              <div className="w-full h-full rounded-full p-[2px] bg-black">
+                <img
+                  src={currentUser?.profileImage}
+                  alt="Your profile"
+                  className="w-full h-full rounded-full object-cover"
+                  onError={(e) => {
+                    e.target.src = `https://ui-avatars.com/api/?name=${currentUser?.username || 'Me'}&background=333&color=fff&size=62`;
+                  }}
+                />
+              </div>
+              
+              {/* Plus Badge */}
+              <div className="absolute bottom-0 right-0 w-[18px] h-[18px] bg-blue-500 rounded-full border border-black flex items-center justify-center text-white text-[11px] font-bold shadow-md">
+                +
+              </div>
+            </div>
+            <span className="text-[11px] text-neutral-400 max-w-[64px] truncate group-hover:text-neutral-200 transition-colors">
+              Your Story
+            </span>
+          </div>
+
+          {/* Followed Users' Stories */}
           {groupedStories.slice(0, 10).map((story, idx) => (
             <div
               key={`story-${idx}`}
@@ -66,8 +99,14 @@ const StoriesBar = () => {
           onClose={() => setActiveUserIdx(null)}
         />
       )}
+
+      {/* Render the Upload Status Modal */}
+      {isUploadOpen && (
+        <UploadStatusModal onClose={() => setIsUploadOpen(false)} />
+      )}
     </div>
   );
 };
 
 export default StoriesBar;
+

@@ -1,9 +1,25 @@
-import { useQuery } from "@tanstack/react-query";
-import { getStatus } from "../api/status.api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getStatus, addStatus } from "../api/status.api";
 
 export const useStatus = () => {
-    return useQuery({
+    const queryClient = useQueryClient();
+
+    const query = useQuery({
         queryKey: ["status"],
         queryFn: getStatus,
     });
-};
+
+    const mutation = useMutation({
+        mutationFn: addStatus,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["status"] });
+        },
+    });
+
+    return {
+        ...query,
+        uploadStatus: mutation.mutateAsync,
+        isUploading: mutation.isPending,
+        uploadError: mutation.error,
+    };
+};
