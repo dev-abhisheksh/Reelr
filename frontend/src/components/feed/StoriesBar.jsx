@@ -1,24 +1,12 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { getStatus } from "../../api/status.api";
+import { useStatus } from "../../hooks/useStatus";
 
 const StoriesBar = () => {
-  const [feedPosts, setFeedPosts] = useState([])
-
-  useEffect(()=>{
-    const fetchAllStatsu = async()=>{
-      try {
-        const res = await getStatus()
-        setFeedPosts(res.data.status)
-        console.log(res.data)
-      } catch (error) {
-        console.log(error)
-      }
-    }
-
-    fetchAllStatsu()
-  },[])
-
+  const { data, isLoading, isError, error } = useStatus()
+  const feedPosts = data?.data || [];
+  
   return (
     <div className="pt-[52px]">
       <div className="max-w-[470px] mx-auto border-b border-white/[0.06]">
