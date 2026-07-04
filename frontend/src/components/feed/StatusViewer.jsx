@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useStatus } from "../../hooks/useStatus";
 
 const StatusViewer = ({ stories, initialUserIndex, onClose }) => {
+  const { markAsViewed } = useStatus();
   const [currentUserIdx, setCurrentUserIdx] = useState(initialUserIndex);
   const [currentStatusIdx, setCurrentStatusIdx] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -9,6 +11,14 @@ const StatusViewer = ({ stories, initialUserIndex, onClose }) => {
 
   const currentStory = stories[currentUserIdx];
   const currentStatus = currentStory?.statuses[currentStatusIdx];
+
+  useEffect(() => {
+    if (currentStatus?._id) {
+      markAsViewed(currentStatus._id).catch((err) => {
+        console.error("Failed to mark status as viewed:", err);
+      });
+    }
+  }, [currentStatus?._id, markAsViewed]);
 
   const handleNext = () => {
     setProgress(0);
@@ -191,7 +201,7 @@ const StatusViewer = ({ stories, initialUserIndex, onClose }) => {
             </p>
           </div>
         )}
-      </div>F
+      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getStatus, addStatus } from "../api/status.api";
+import { getStatus, addStatus, viewStatus } from "../api/status.api";
 
 export const useStatus = () => {
     const queryClient = useQueryClient();
@@ -16,10 +16,18 @@ export const useStatus = () => {
         },
     });
 
+    const viewMutation = useMutation({
+        mutationFn: viewStatus,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["status"] });
+        },
+    });
+
     return {
         ...query,
         uploadStatus: mutation.mutateAsync,
         isUploading: mutation.isPending,
         uploadError: mutation.error,
+        markAsViewed: viewMutation.mutateAsync,
     };
 };

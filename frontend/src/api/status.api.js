@@ -12,4 +12,9 @@ export const addStatus = async (formData) => {
     },
   });
   return res.data;
+};
+
+export const viewStatus = async (statusId) => {
+  const res = await API.post(`/status/view/${statusId}`);
+  return res.data;
 };

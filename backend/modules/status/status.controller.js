@@ -69,6 +69,22 @@ const fetchStatus = asyncHandler(async (req, res) => {
     })
 })
 
+const markStatusAsViewed = asyncHandler(async (req, res) => {
+    const { statusId } = req.params;
+    if (!statusId) throw new ApiError(400, "StatusId is invalid or not provided");
+
+    const exists = await Status.findById(statusId)
+    if (!exists) throw new ApiError(404, "Status not found")
+
+    exists.isViewed = true;
+    await exists.save();
+
+    return res.status(200).json({
+        success: true,
+        message: "Status marked as viewed successfully"
+    })
+})
+
 export {
     addStatus,
     fetchStatus
