@@ -13,6 +13,7 @@ import notificationRoutes from "./routes/notification.route.js"
 import searchRoutes from "./routes/search.route.js"
 import commentRoutes from "./modules/reelComment/reelComment.route.js"
 import statusRouter from "./modules/status/status.route.js"
+import statusCommentRouter from "./modules/statusComment/statusComment.route.js"
 
 dotenv.config() 
 
@@ -37,5 +38,6 @@ app.use("/follow", followRoutes)
 app.use("/notification", notificationRoutes)
 app.use("/search", searchRoutes)
 app.use("/status",statusRouter)
+app.use("/status-comment", statusCommentRouter)
     
 export { app }
