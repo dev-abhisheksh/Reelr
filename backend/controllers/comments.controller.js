@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Comment } from "../models/comments.model.js";
+import { ReelComment } from "../models/reelComment.model.js";
 import sanitizeHtml from "sanitize-html";
 import { Reel } from "../models/reels.model.js";
 
@@ -29,7 +29,7 @@ const addComment = async (req, res) => {
                 throw new Error("Reel not found");
             }
 
-            const newComment = await Comment.create([{
+            const newComment = await ReelComment.create([{
                 comment: cleanText,
                 userId: req.user._id,
                 reelId
@@ -41,7 +41,7 @@ const addComment = async (req, res) => {
                 { session }
             );
 
-            populatedComment = await Comment.findById(newComment[0]._id)
+            populatedComment = await ReelComment.findById(newComment[0]._id)
                 .populate("userId", "username profileImage")
                 .session(session);
         });
@@ -71,7 +71,7 @@ const getComments = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(reelId)) {
             return res.status(400).json({ message: "Invalid ReelId" });
         }
-        const comments = await Comment.find({ reelId }).populate("userId", "username profileImage").sort({ createdAt: -1 });
+        const comments = await ReelComment.find({ reelId }).populate("userId", "username profileImage").sort({ createdAt: -1 });
         return res.status(200).json({ comments })
     } catch (error) {
         console.error("Failed to fetch comments", error);
@@ -87,7 +87,7 @@ const pinComment = async (req, res) => {
             return res.status(400).json({ message: "Invalid CommentId" });
         }
 
-        const comment = await Comment.findById(commentId)
+        const comment = await ReelComment.findById(commentId)
             .select("reelId isPinned");
 
         if (!comment) {
@@ -100,7 +100,7 @@ const pinComment = async (req, res) => {
             return res.status(403).json({ message: "Only reel owner can pin comments" });
         }
 
-        const updatedComment = await Comment.findByIdAndUpdate(
+        const updatedComment = await ReelComment.findByIdAndUpdate(
             commentId,
             { $set: { isPinned: !comment.isPinned } },
             { new: true }

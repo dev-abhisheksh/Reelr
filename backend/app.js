@@ -11,7 +11,7 @@ import postRoutes from "./routes/post.route.js"
 import followRoutes from "./routes/follow.route.js"
 import notificationRoutes from "./routes/notification.route.js"
 import searchRoutes from "./routes/search.route.js"
-import commentRoutes from "./modules/user/comment.route.js"
+import commentRoutes from "./modules/reelComment/reelComment.route.js"
 import statusRouter from "./modules/status/status.route.js"
 
 dotenv.config() 
