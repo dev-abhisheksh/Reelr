@@ -19,11 +19,8 @@ const postCommentSchema = new mongoose.Schema({
         maxlength: 500
     },
 
-    createdAt: {
-        type: Date,
-        default: Date.now,
-        expires: 86400
-    }
-}, { timestamps: false })
+}, { timestamps: true })
+
+postCommentSchema.index({ postId: 1, createdAt: -1 })
 
 export const postComment = mongoose.model("postComment", postCommentSchema)
