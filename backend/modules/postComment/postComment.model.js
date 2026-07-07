@@ -19,6 +19,11 @@ const postCommentSchema = new mongoose.Schema({
         maxlength: 500
     },
 
+    isDeleted: {
+        type: Boolean,
+        default: false
+    }
+
 }, { timestamps: true })
 
 postCommentSchema.index({ postId: 1, createdAt: -1 })

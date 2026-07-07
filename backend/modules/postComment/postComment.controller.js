@@ -24,6 +24,29 @@ const addCommentOnPost = asyncHandler(async (req, res) => {
     })
 })
 
+const fetchAllCommentsOfAPost = asyncHandler(async (req, res) => {
+    const { postId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(postId)) throw new ApiError(400, "Invalid PostId");
+
+    const comments = await PostComment.find({
+        postId,
+        isDeleted: false
+    })
+        .populate("userId", "username profileImage")
+
+    if (comments.length < 0) return res.status(200).json({
+        message: `Fetched ${comments.length} comments`
+    })
+
+    return res.status(200).json({
+        success: true,
+        message: `Fetched ${comments.length} comments`,
+        comments
+    })
+})
+
 export {
-    addCommentOnPost
+    addCommentOnPost,
+    fetchAllCommentsOfAPost
 }
