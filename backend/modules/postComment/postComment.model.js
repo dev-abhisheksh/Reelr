@@ -23,4 +23,4 @@ const postCommentSchema = new mongoose.Schema({
 
 postCommentSchema.index({ postId: 1, createdAt: -1 })
 
-export const postComment = mongoose.model("postComment", postCommentSchema)
+export const PostComment = mongoose.model("PostComment", postCommentSchema)
